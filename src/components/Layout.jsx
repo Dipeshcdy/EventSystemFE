@@ -32,7 +32,7 @@ const Layout = () => {
       <div className=''>
         <div onClick={toggleSidebar} className={`fixed left-0 top-0 w-full h-full z-[998] bg-gray-600 bg-opacity-50 transition-all duration-300 ease-linear  ${isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0  pointer-events-none"} `}>
         </div>
-        <TopBar isSidebarOpenInLg={isSidebarOpenInLg} toggleSidebarInLg={toggleSidebarInLg} toggleSidebar={toggleSidebar} title="Welcome to Restaurant POS System" loading={loading} />
+        <TopBar isSidebarOpenInLg={isSidebarOpenInLg} toggleSidebarInLg={toggleSidebarInLg} toggleSidebar={toggleSidebar} title="Event Ticketing System" loading={loading} />
         <div className={`transition-all duration-700 ease-in-out ${isSidebarOpenInLg && "lg:ml-[18rem]"}`}>
           <div className={`py-5 px-5 pt-20 relative min-h-screen dark:bg-black dark:!text-white `}>
             <Outlet />

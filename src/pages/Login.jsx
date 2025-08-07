@@ -3,8 +3,8 @@ import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import Loader from "../common/Loader";
 
-import bg from "../images/1.png"
-import designerImage from "../images/Designer.png"
+import bg from "../images/1.png";
+import designerImage from "../images/Designer.png";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
 import axiosInstance from "../services/axios";
@@ -12,21 +12,21 @@ import { useAuth } from "../context/AuthContext";
 import ModalLayout from "../components/modal/ModalLayout";
 import TextBox from "../components/TextBox";
 const Login = () => {
-  const {accessToken, setAccessToken,handleRedirect} = useAuth();
-  if(accessToken)
-  {
+  const { accessToken, setAccessToken, handleRedirect } = useAuth();
+  if (accessToken) {
     handleRedirect();
   }
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [forgotPasswordModal, setForgotPasswordModal] = useState(false);
+  const [verifyEmailModal, setVerifyEmailModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const apiKey = import.meta.env["VITE_APP_BASE_URL"];
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const togglePasswordVisible = () => {
     setIsPasswordVisible(!isPasswordVisible);
-  }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email.trim() === "" || password.trim() === "") {
@@ -39,46 +39,75 @@ const Login = () => {
     };
     setLoading(true);
     try {
-      const response = await axiosInstance.post(`${apiKey}api/authentication/login`, formData);
+      const response = await axiosInstance.post(
+        `${apiKey}api/authentication/login`,
+        formData
+      );
       if (response.status === 200) {
         setAccessToken(response.data.data.token);
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-   const handleForgotPassword = async () => {
+  const handleForgotPassword = async () => {
+    console.log("Entered");
 
-    console.log("Entered")
-
-    if (!email.trim()){
+    if (!email.trim()) {
       toast.error("Please enter your email");
       return;
     }
 
     try {
       const response = await axiosInstance.post(
-        `${apiKey}api/Authentication/forgot-password`,{
+        `${apiKey}api/Authentication/forgot-password`,
+        {
           email: email,
-          returnUrl: `${returnUrl}reset-password`
+          returnUrl: `${returnUrl}reset-password`,
         }
       );
       if (response.status === 200) {
-      toast.success("Password reset email sent successfully.");
-      setForgotPasswordModal(false);
-      setEmail("");
+        toast.success("Password reset email sent successfully.");
+        setForgotPasswordModal(false);
+        setEmail("");
+      }
+    } catch (error) {
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to send reset email.");
+        console.error("Forgot password error:", error);
+      }
     }
+  };
+
+  const handleEmailVerification = async () => {
+    if (!email.trim()) {
+      toast.error("Please enter your email");
+      return;
     }
-    catch (error) {
-    if (error.response?.data?.message) {
-      toast.error(error.response.data.message);
-    } else {
-      toast.error("Failed to send reset email.");
-      console.error("Forgot password error:", error);
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.post(
+        `${apiKey}api/Authentication/resend-verification`,
+        {
+          email: email,
+        }
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        setVerifyEmailModal(false);
+        setEmail("");
+      }
+    } catch (error) {
+    } finally {
+      setLoading(false);
     }
-  }
-}
+  };
 
   return (
     <>
@@ -88,62 +117,127 @@ const Login = () => {
         </>
       ) : (
         <>
-          <div className="font-[sans-serif]" style={{
-            backgroundImage: `url(${bg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'top',
-            backgroundAttachment: 'fixed',
-          }}>
+          <div
+            className="font-[sans-serif]"
+            style={{
+              backgroundImage: `url(${bg})`,
+              backgroundSize: "cover",
+              backgroundPosition: "top",
+              backgroundAttachment: "fixed",
+            }}
+          >
             <div className="min-h-screen flex flex-col items-center justify-center backdrop-blur-sm px-5">
               <div className="grid md:grid-cols-2 items-center gap-4 max-md:gap-8 max-w-6xl max-md:max-w-lg w-full p-4 m-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.3)] rounded-md bg-white">
                 <div className="md:max-w-md w-full px-4 py-4">
                   <form onSubmit={handleSubmit}>
                     <div className="mb-12">
-                      <h3 className="text-gray-800 text-3xl font-extrabold">Sign in</h3>
-                      <p className="text-sm mt-4 text-gray-800">Don't have an account <Link to="/register" className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap">Register here</Link></p>
+                      <h3 className="text-gray-800 text-3xl font-extrabold">
+                        Sign in
+                      </h3>
+                      <p className="text-sm mt-4 text-gray-800">
+                        Don't have an account{" "}
+                        <Link
+                          to="/register"
+                          className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap"
+                        >
+                          Register here
+                        </Link>
+                      </p>
                     </div>
 
                     <div>
-                      <label className="text-gray-800 text-xs block mb-2">Email</label>
+                      <label className="text-gray-800 text-xs block mb-2">
+                        Email
+                      </label>
                       <div className="relative flex items-center">
-                        <input name="email" type="text" value={email}
-                          onChange={(e) => setEmail(e.target.value)} className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none" placeholder="Enter email" />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-2" viewBox="0 0 682.667 682.667">
+                        <input
+                          name="email"
+                          type="text"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
+                          placeholder="Enter email"
+                        />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="#bbb"
+                          stroke="#bbb"
+                          className="w-[18px] h-[18px] absolute right-2"
+                          viewBox="0 0 682.667 682.667"
+                        >
                           <defs>
                             <clipPath id="a" clipPathUnits="userSpaceOnUse">
-                              <path d="M0 512h512V0H0Z" data-original="#000000"></path>
+                              <path
+                                d="M0 512h512V0H0Z"
+                                data-original="#000000"
+                              ></path>
                             </clipPath>
                           </defs>
-                          <g clip-path="url(#a)" transform="matrix(1.33 0 0 -1.33 0 682.667)">
-                            <path fill="none" stroke-miterlimit="10" stroke-width="40" d="M452 444H60c-22.091 0-40-17.909-40-40v-39.446l212.127-157.782c14.17-10.54 33.576-10.54 47.746 0L492 364.554V404c0 22.091-17.909 40-40 40Z" data-original="#000000"></path>
-                            <path d="M472 274.9V107.999c0-11.027-8.972-20-20-20H60c-11.028 0-20 8.973-20 20V274.9L0 304.652V107.999c0-33.084 26.916-60 60-60h392c33.084 0 60 26.916 60 60v196.653Z" data-original="#000000"></path>
+                          <g
+                            clip-path="url(#a)"
+                            transform="matrix(1.33 0 0 -1.33 0 682.667)"
+                          >
+                            <path
+                              fill="none"
+                              stroke-miterlimit="10"
+                              stroke-width="40"
+                              d="M452 444H60c-22.091 0-40-17.909-40-40v-39.446l212.127-157.782c14.17-10.54 33.576-10.54 47.746 0L492 364.554V404c0 22.091-17.909 40-40 40Z"
+                              data-original="#000000"
+                            ></path>
+                            <path
+                              d="M472 274.9V107.999c0-11.027-8.972-20-20-20H60c-11.028 0-20 8.973-20 20V274.9L0 304.652V107.999c0-33.084 26.916-60 60-60h392c33.084 0 60 26.916 60 60v196.653Z"
+                              data-original="#000000"
+                            ></path>
                           </g>
                         </svg>
                       </div>
                     </div>
 
                     <div className="mt-8">
-                      <label className="text-gray-800 text-xs block mb-2">Password</label>
+                      <label className="text-gray-800 text-xs block mb-2">
+                        Password
+                      </label>
                       <div className="relative flex items-center">
-                        <input name="password" type={`${isPasswordVisible ? 'text' : 'password'}`} value={password}
-                          onChange={(e) => setPassword(e.target.value)} className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none" placeholder="Enter password" />
-                        <a className="absolute right-2 cursor-pointer" onClick={togglePasswordVisible}>
+                        <input
+                          name="password"
+                          type={`${isPasswordVisible ? "text" : "password"}`}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full text-gray-800 text-sm border-b border-gray-300 focus:border-blue-600 px-2 py-3 outline-none"
+                          placeholder="Enter password"
+                        />
+                        <a
+                          className="absolute right-2 cursor-pointer"
+                          onClick={togglePasswordVisible}
+                        >
                           {/* <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px]  cursor-pointer" viewBox="0 0 128 128">
                             <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
                           </svg> */}
-                          {isPasswordVisible ? <>
-                            <IoEyeOffOutline className="text-[#bbb] text-xl" />
-                          </> : <>
-                            <IoEyeOutline className="text-[#bbb] text-xl" />
-                          </>}
+                          {isPasswordVisible ? (
+                            <>
+                              <IoEyeOffOutline className="text-[#bbb] text-xl" />
+                            </>
+                          ) : (
+                            <>
+                              <IoEyeOutline className="text-[#bbb] text-xl" />
+                            </>
+                          )}
                         </a>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-4 mt-6">
                       <div className="flex items-center">
-                        <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                        <label htmlFor="remember-me" className="ml-3 block text-sm text-gray-800">
+                        <input
+                          id="remember-me"
+                          name="remember-me"
+                          type="checkbox"
+                          className="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor="remember-me"
+                          className="ml-3 block text-sm text-gray-800"
+                        >
                           Remember me
                         </label>
                       </div>
@@ -158,10 +252,23 @@ const Login = () => {
                       </div>
                     </div>
                     <div className="mt-12">
-                      <button type="submit" className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+                      <button
+                        type="submit"
+                        className="w-full shadow-xl py-2.5 px-4 text-sm tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                      >
                         Sign in
                       </button>
                     </div>
+                    <p className="text-sm mt-4 text-gray-800">
+                      Email Not Verified?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setVerifyEmailModal(true)}
+                        className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap"
+                      >
+                        Verify Email
+                      </button>
+                    </p>
 
                     {/* <div className="space-x-6 flex justify-center mt-6">
                       <button type="button"
@@ -204,7 +311,11 @@ const Login = () => {
                 </div>
 
                 <div className="md:h-full rounded-xl md:block hidden">
-                  <img src={designerImage} className="w-full h-full object-cover object-center rounded-xl" alt="login-image" />
+                  <img
+                    src={designerImage}
+                    className="w-full h-full object-cover object-center rounded-xl"
+                    alt="login-image"
+                  />
                 </div>
               </div>
             </div>
@@ -219,7 +330,7 @@ const Login = () => {
             }}
             submitLabel="Send Email"
           >
-           <div className="p-5">
+            <div className="p-5">
               {/* Title */}
               <h2 className="text-sm inline-block border-b-2 border-gray-400">
                 Change Password
@@ -228,19 +339,24 @@ const Login = () => {
               <div className="mt-5">
                 <div className="flex flex-col gap-4">
                   <div className="w-full">
-                    <h1 className="text-3xl text-blue-500 mb-3">Reset Your Password</h1>
-                    <p>Enter the email associated with your account and we will send you a mail</p>
+                    <h1 className="text-3xl text-blue-500 mb-3">
+                      Reset Your Password
+                    </h1>
+                    <p>
+                      Enter the email associated with your account and we will
+                      send you a mail
+                    </p>
                   </div>
 
                   <div className="w-full">
                     <TextBox
-                    id="resetPassword"
-                    type="email"
-                    value = {email}
-                    label="Email"
-                    onchange={(e) => {
-                      setEmail(e.target.value);
-                    }}
+                      id="resetPassword"
+                      type="email"
+                      value={email}
+                      label="Email"
+                      onchange={(e) => {
+                        setEmail(e.target.value);
+                      }}
                     />
                   </div>
                 </div>
@@ -248,7 +364,48 @@ const Login = () => {
             </div>
           </ModalLayout>
 
+          <ModalLayout
+            open={verifyEmailModal}
+            submit={handleEmailVerification}
+            onClose={() => {
+              setVerifyEmailModal(false);
+              setEmail("");
+            }}
+            submitLabel="Send Email"
+          >
+            <div className="p-5">
+              {/* Title */}
+              <h2 className="text-sm inline-block border-b-2 border-gray-400">
+                Email Verification
+              </h2>
 
+              <div className="mt-5">
+                <div className="flex flex-col gap-4">
+                  <div className="w-full">
+                    <h1 className="text-3xl text-blue-500 mb-3">
+                      Verify Email
+                    </h1>
+                    <p>
+                      Enter the email associated with your account and we will
+                      send you a mail
+                    </p>
+                  </div>
+
+                  <div className="w-full">
+                    <TextBox
+                      id="resetPassword"
+                      type="email"
+                      value={email}
+                      label="Email"
+                      onchange={(e) => {
+                        setEmail(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ModalLayout>
         </>
       )}
     </>

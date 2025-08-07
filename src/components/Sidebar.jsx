@@ -14,8 +14,9 @@ import {
 } from "../utils/jwtUtils";
 
 import { Roles } from "../constants/constants";
-import EventSidebar from "./ServicesSidebar/EventSidebar";
-
+import EventSidebar from "./ServicesSidebar/admin/EventSidebar";
+import OrganizerSidebar from "./ServicesSidebar/admin/OrganizerSidebar";
+import OrganizerEventSidebar from "./ServicesSidebar/organizer/OrganizerEventSidebar";
 
 function Sidebar({
   active,
@@ -41,11 +42,13 @@ function Sidebar({
     <>
       <aside
         id="default-sidebar"
-        className={`fixed  top-0 lg:left-0  ${isSidebarOpen ? "left-0" : "-left-full"
-          } ${isSidebarOpenInLg
+        className={`fixed  top-0 lg:left-0  ${
+          isSidebarOpen ? "left-0" : "-left-full"
+        } ${
+          isSidebarOpenInLg
             ? "translate-x-0 opacity-100"
             : "-translate-x-full opacity-0"
-          } lg:w-[18rem]  w-[70%] h-screen bg-white dark:bg-black transition-all lg:duration-700 lg:ease-in-out duration-500  ease-linear z-[999] `}
+        } lg:w-[18rem]  w-[70%] h-screen bg-white dark:bg-black transition-all lg:duration-700 lg:ease-in-out duration-500  ease-linear z-[999] `}
         aria-label="Sidebar"
       >
         <div className=" flex flex-col h-full px-3 py-4 pt-1">
@@ -65,24 +68,59 @@ function Sidebar({
           </div>
           <div className="flex-1 overflow-auto no-scrollbar">
             <ul className="space-y-2 font-medium mt-5">
-              <li>
-                <SidebarButton
-                  page="dashboard"
-                  activePage={active}
-                  route="/admin/dashboard"
-                >
-                  <RxDashboard className="text-lg" />
-                  <span className="ms-3">Dashboard</span>
-                </SidebarButton>
-              </li>
-              <li>
-                <EventSidebar
-                  active={active}
-                  activeSubMenu={activeSubMenu}
-                  openMenu={openMenu}
-                  toggleSubmenu={toggleSubmenu}
-                />
-              </li>
+              {role == Roles.Admin && (
+                <>
+                  <li>
+                    <SidebarButton
+                      page="dashboard"
+                      activePage={active}
+                      route="/admin/dashboard"
+                    >
+                      <RxDashboard className="text-lg" />
+                      <span className="ms-3">Dashboard</span>
+                    </SidebarButton>
+                  </li>
+                  <li>
+                    <EventSidebar
+                      active={active}
+                      activeSubMenu={activeSubMenu}
+                      openMenu={openMenu}
+                      toggleSubmenu={toggleSubmenu}
+                    />
+                  </li>
+                  <li>
+                    <OrganizerSidebar
+                      active={active}
+                      activeSubMenu={activeSubMenu}
+                      openMenu={openMenu}
+                      toggleSubmenu={toggleSubmenu}
+                    />
+                  </li>
+                </>
+              )}
+
+              {role == Roles.Organizer && (
+                <>
+                  <li>
+                    <SidebarButton
+                      page="dashboard"
+                      activePage={active}
+                      route="/organizer/dashboard"
+                    >
+                      <RxDashboard className="text-lg" />
+                      <span className="ms-3">Dashboard</span>
+                    </SidebarButton>
+                  </li>
+                  <li>
+                    <OrganizerEventSidebar
+                      active={active}
+                      activeSubMenu={activeSubMenu}
+                      openMenu={openMenu}
+                      toggleSubmenu={toggleSubmenu}
+                    />
+                  </li>
+                </>
+              )}
 
               <li>
                 <a

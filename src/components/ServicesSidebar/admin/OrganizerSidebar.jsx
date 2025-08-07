@@ -1,27 +1,26 @@
-import SidebarButton from "../SidebarButton";
+import SidebarButton from "../../SidebarButton";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdEditDocument } from "react-icons/md";
 import { LuChartNoAxesCombined } from "react-icons/lu";
 
-const EventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu }) => {
+const OrganizerSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu }) => {
 
     return (
         <>
             <SidebarButton
-                page="events"
+                page="organizers"
                 activePage={active}
-                route="/admin/events"
                 hasDropdown={true}
-                onClick={() => toggleSubmenu("events")}
+                onClick={() => toggleSubmenu("organizers")}
             >
                 <div className="flex justify-between items-center w-full">
                     <div className="flex">
                         <LuChartNoAxesCombined className="text-xl" />
-                        <span className="ms-3">Events</span>
+                        <span className="ms-3">Organizers</span>
                     </div>
                     <div>
                         <IoIosArrowDown
-                            className={`text-xl -mt-1 ${openMenu === "events" ? "rotate-180" : ""
+                            className={`text-xl -mt-1 ${openMenu === "organizers" ? "rotate-180" : ""
                                 } transition-all duration-300 ease-linear`}
                         />
                     </div>
@@ -29,7 +28,7 @@ const EventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu }) => {
             </SidebarButton>
 
             <ul
-                className={`grid grid-rows-[0fr] pl-4 transition-all duration-300 ease-linear ${openMenu === "events" ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                className={`grid grid-rows-[0fr] pl-4 transition-all duration-300 ease-linear ${openMenu === "organizers" ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                     }`}
             >
                 <div className="overflow-hidden">
@@ -37,23 +36,34 @@ const EventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu }) => {
                         <li>
                             <SidebarButton
                                 page=""
-                                subMenu="eventcategory"
+                                subMenu="pendingOrganizers"
                                 activeSubMenu={activeSubMenu}
-                                route="/admin/eventcategory"
+                                route="/admin/organizers/pending"
                             >
                                 <MdEditDocument className="text-xl" />
-                                <span className="ms-3">Category</span>
+                                <span className="ms-3">Pending</span>
                             </SidebarButton>
                         </li>
                         <li>
                             <SidebarButton
                                 page=""
-                                subMenu="event"
+                                subMenu="approvedOrganizers"
                                 activeSubMenu={activeSubMenu}
-                                route="/admin/event"
+                                route="/admin/organizers/approved"
                             >
                                 <MdEditDocument className="text-xl" />
-                                <span className="ms-3">Events</span>
+                                <span className="ms-3">Approved</span>
+                            </SidebarButton>
+                        </li>
+                        <li>
+                            <SidebarButton
+                                page=""
+                                subMenu="rejectedOrganizers"
+                                activeSubMenu={activeSubMenu}
+                                route="/admin/organizers/rejected"
+                            >
+                                <MdEditDocument className="text-xl" />
+                                <span className="ms-3">Rejected</span>
                             </SidebarButton>
                         </li>
                     </div>
@@ -63,4 +73,4 @@ const EventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu }) => {
     );
 };
 
-export default EventSidebar;
+export default OrganizerSidebar;

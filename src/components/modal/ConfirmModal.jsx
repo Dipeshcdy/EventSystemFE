@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
-export default function ConfirmModal({open,submit,onClose}) {
+export default function ConfirmModal({open,submit,onClose,isDanger=true}) {
 
   return (
     <Dialog open={open} onClose={onClose} className="relative  z-[999]">
@@ -40,7 +40,7 @@ export default function ConfirmModal({open,submit,onClose}) {
               <button
                 type="button"
                 onClick={submit}
-                className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
+                className={`inline-flex w-full justify-center rounded-md ${isDanger?"bg-red-600  hover:bg-red-500":"bg-blue-600  hover:bg-blue-500"} px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto`}
               >
                 Confirm
               </button>

@@ -8,6 +8,7 @@ import setup from "../images/setup.jpg"
 import axiosInstance from '../services/axios';
 import Loader from '../common/Loader';
 import TextBox from '../components/TextBox';
+import { Link, useNavigate } from 'react-router-dom';
 
 const initialState = {
     email: '',
@@ -29,18 +30,12 @@ const initialState = {
 
 const OrganizerRegister = () => {
     const apiKey = import.meta.env["VITE_APP_BASE_URL"];
+    const navigate=useNavigate();
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState(initialState);
     const [formErrors, setFormErrors] = useState({});
     const genders = [{ value: 1, label: "Male" }, { value: 2, label: "Female" }];
     const idTypes = [{ value: 1, label: "Citizenship" }, { value: 2, label: "Passport" }, { value: 3, label: "NIN" }];
-    const handleChange = (e) => {
-        const { name, value, files, type } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'file' ? files[0] : value,
-        });
-    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -81,7 +76,7 @@ const OrganizerRegister = () => {
                 if (!trimmed) message = "ID number is required";
                 else if (!/^\d+$/.test(trimmed)) message = "ID number must be numeric";
                 break;
-            
+
             default:
                 if (!trimmed) message = `${fieldName.replace(/([A-Z])/g, " $1")} is required`;
                 break;
@@ -129,7 +124,7 @@ const OrganizerRegister = () => {
         const requiredFields = [
             "email", "firstName", "lastName", "phoneNo", "address", "gender",
             "password", "confimPassword", "organizationName", "organizationAddress",
-            "idType", "idNumber", "idDocumentImage", "businessRegistrationImage","profile"
+            "idType", "idNumber", "idDocumentImage", "businessRegistrationImage", "profile"
         ];
 
         for (const field of requiredFields) {
@@ -181,24 +176,35 @@ const OrganizerRegister = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append("Address", address);
-        formData.append("RegistrationNumber", registrationNumber);
-        formData.append("TaxNumber", taxtNumber);
-        formData.append("ContactNumber", contactNumber);
-        formData.append("WebsiteUrl", websiteUrl);
-        formData.append("Description", description);
-        formData.append("OrganizationTypeId", organizationType.value);
-        formData.append("Logo", logo);
-        formData.append("TaxDocument", taxdoc);
-        formData.append("UserName", userName);
-        formData.append("UserAddress", userAddress);
-        formData.append("UserContact", userContact);
-        formData.append("Gender", gender.value);
-        formData.append("Profile", profilePicture);
+        const data = new FormData();
+
+        data.append("email", formData.email);
+        data.append("firstName", formData.firstName);
+        data.append("lastName", formData.lastName);
+        data.append("phoneNo", formData.phoneNo);
+        data.append("address", formData.address);
+        data.append("gender", formData.gender?.value || ""); // for Select input
+        data.append("password", formData.password);
+        data.append("confimPassword", formData.confimPassword);
+        data.append("organizationName", formData.organizationName);
+        data.append("organizationAddress", formData.organizationAddress);
+        data.append("idType", formData.idType?.value || ""); // for Select input
+        data.append("idNumber", formData.idNumber);
+
+        if (formData.idDocumentImage) {
+            data.append("idDocumentImage", formData.idDocumentImage);
+        }
+
+        if (formData.businessRegistrationImage) {
+            data.append("businessRegistrationImage", formData.businessRegistrationImage);
+        }
+
+        if (formData.profile) {
+            data.append("ProfileImage", formData.profile);
+        }
         setLoading(true);
         try {
-            const response = await axiosInstance.post(`${apiKey}api/organization/organization-setup`, formData, {
+            const response = await axiosInstance.post(`${apiKey}api/authentication/register-as-organizer`, data, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 }
@@ -206,20 +212,12 @@ const OrganizerRegister = () => {
 
             if (response.status === 200) {
                 toast.success(response.data.message + " Please do login again");
-                setLoading(false);
-                logout();
+                navigate("/login");
             }
         } catch (error) {
-            if (error.response) {
-                var errorMessage = error.response.data.message;
-                toast.error(errorMessage);
-            } else if (error.message) {
-                console.log("Error", error.message);
-                toast.error("Error", error.message);
-            } else {
-                toast.error(error);
-                console.log("Error", error);
-            }
+        }
+        finally{
+            setLoading(false);
         }
     };
     return (
@@ -288,7 +286,7 @@ const OrganizerRegister = () => {
                                     <h2 className='ml-2 text-base text-gray-500 text-center'>Business/Company Registration</h2>
                                     <div className='mt-2'>
                                         <ImageUploadInput setFile={handleInputChange("businessRegistrationImage")} customKey="businessRegistration"
-                                         error={formErrors.businessRegistrationImage}
+                                            error={formErrors.businessRegistrationImage}
                                         />
                                     </div>
                                 </div>
@@ -397,7 +395,7 @@ const OrganizerRegister = () => {
                                     <h2 className='ml-2 text-base text-gray-500 text-center'>Id Verification Image</h2>
                                     <div className='mt-2'>
                                         <ImageUploadInput setFile={handleInputChange("idDocumentImage")} customKey="idDocumentImage"
-                                        error={formErrors.idDocumentImage}
+                                            error={formErrors.idDocumentImage}
                                         />
                                     </div>
                                 </div>
@@ -405,20 +403,20 @@ const OrganizerRegister = () => {
                                     <h2 className='ml-2 text-base text-gray-500 text-center'>Upload Profile</h2>
                                     <div className='mt-2'>
                                         <ImageUploadInput setFile={handleInputChange("profile")} customKey="profile"
-                                        error={formErrors.profile}
+                                            error={formErrors.profile}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end mt-10">
-                            {/* <div>
-                                <button onClick={handleLogout}
+                        <div className="flex justify-between items-center mt-10">
+                            <div>
+                                <Link to="/register"
                                     className="py-1.5 px-9 border border-blue-600 rounded-xl text-gray-900 hover:bg-blue-50 transition-all duration-500"
                                 >
-                                    Logout
-                                </button>
-                            </div> */}
+                                    Back
+                                </Link>
+                            </div>
                             <div>
                                 <button onClick={handleSubmit} className="bg-blue-600 text-white py-1.5 px-9 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all">
                                     Save

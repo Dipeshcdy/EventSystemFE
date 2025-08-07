@@ -122,7 +122,7 @@ const Register = () => {
                             </svg>
                           </div>
                           <h2 class="text-xl font-bold text-gray-800 mb-2">Register as User</h2>
-                          <p class="text-gray-600 mb-6">Purchase Event Tickets, explore activities, and connect with communities.</p>
+                          <p class="text-gray-600 mb-6">Purchase Event Tickets and explore activities.</p>
                           <a href="/register/user"
                             class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Join Now</a>
                         </div>
@@ -138,7 +138,7 @@ const Register = () => {
                             </svg>
                           </div>
                           <h2 class="text-xl font-bold text-gray-800 mb-2">Register as Organizer</h2>
-                          <p class="text-gray-600 mb-6">Host your events, manage attendees, and gain visibility.</p>
+                          <p class="text-gray-600 mb-6">Host your events and gain visibility.</p>
                           <Link to="/register/organizer"
                             class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition">Start Hosting</Link>
                         </div>

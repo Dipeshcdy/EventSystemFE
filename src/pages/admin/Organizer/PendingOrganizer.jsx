@@ -9,18 +9,23 @@ import Pagination from "../../../components/Pagination";
 import { FaSquarePlus } from "react-icons/fa6";
 import EventCategoryFormModal from "../../../components/modal/EventCategory/EventCategoryFormModal";
 import ConfirmModal from "../../../components/modal/ConfirmModal";
-
+import { FaRegEye } from "react-icons/fa";
+import { Link } from "react-router-dom";
 const TABLE_HEAD = [
     { head: "SN" },
-    { head: "Name" },
+    { head: "Organization Name" },
+    { head: "Organization Address" },
+    { head: "User Name" },
+    { head: "Email" },
+    { head: "Phone No" },
     { head: "Actions" },
 ];
 const pageSize = 5;
-const EventCategory = () => {
+const PendingOrganizer = () => {
     const { setActivePage, setActiveSubMenu, loading, setLoading } = useAuth();
     const [pageLoading, setPageLoading] = useState(true);
-    setActivePage("events");
-    setActiveSubMenu("eventcategory");
+    setActivePage("organizers");
+    setActiveSubMenu("pendingOrganizers");
     const apiKey = import.meta.env["VITE_APP_BASE_URL"];
     const [search, setSearch] = useState("");
     const [pagination, setPagination] = useState({
@@ -61,27 +66,28 @@ const EventCategory = () => {
         }
     }, [search]);
     //products
-    const [eventCategories, setEventCategories] = useState([]);
-
+    const [organizers, setOganizers] = useState([]);
     const constructUrl = (currentPage, pageSize) => {
-        let url = `${apiKey}api/eventcategory`;
-        const params = new URLSearchParams();
+        let url = `${apiKey}api/organizer`;
+        const params = new URLSearchParams();       
+
         if (search) {
             params.append("search", search);
         }
+
+        params.append("status", "Pending"); // <== Add this line
         params.append("pageNumber", currentPage);
         params.append("pageSize", pageSize);
 
         return `${url}?${params.toString()}`;
     };
-
     const fetchData = async (currentPage = 1) => {
         const url = constructUrl(currentPage, pageSize);
         try {
             const response = await axiosInstance.get(url);
             if (response.status == 200) {
                 const data = response.data.data;
-                setEventCategories(data.items);
+                setOganizers(data.items);
                 setPagination({
                     currentPage: data.pageNumber,
                     pageSize: data.pageSize,
@@ -108,7 +114,7 @@ const EventCategory = () => {
 
     //handle Edit
     const handleEdit = (eventCategoryId) => {
-        const dataToEdit = eventCategories.find((c) => c.id === eventCategoryId);
+        const dataToEdit = organizers.find((c) => c.id === eventCategoryId);
         if (dataToEdit) {
             setSelectedEventCategory(productToEdit) // pre-fill modal form
             setModalOpen(true);
@@ -118,7 +124,7 @@ const EventCategory = () => {
     //handle Delete
 
     const handleDelete = async (eventCategoryId) => {
-        const productToDelete = eventCategories.find((p) => p.id === eventCategoryId);
+        const productToDelete = organizers.find((p) => p.id === eventCategoryId);
 
         if (productToDelete) {
             try {
@@ -166,7 +172,7 @@ const EventCategory = () => {
             if (response.status === 200) {
                 toast.success(response.data.message);
                 handleDeleteModalClose();
-                setEventCategories(prev => prev.filter(cat => cat.id !== categoryId));
+                setOganizers(prev => prev.filter(cat => cat.id !== categoryId));
             }
         } catch (error) {
         } finally {
@@ -185,7 +191,7 @@ const EventCategory = () => {
                     <div className="">
                         <div>
                             <h2 className="text-sm inline-block border-b-2 border-gray-400">
-                                Event Categories
+                                Pending Organizers
                             </h2>
                         </div>
                         <div className="mt-5 flex flex-wrap gap-5 justify-between items-center ">
@@ -207,7 +213,7 @@ const EventCategory = () => {
                                 </div>
                             </div>
 
-                            <div>
+                            {/* <div>
                                 <button
                                     onClick={() => {
                                         setSelectedEventCategory(null);
@@ -217,7 +223,7 @@ const EventCategory = () => {
                                 >
                                     Add new Item <FaSquarePlus className="text-xl" />
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className="mt-2">
@@ -241,9 +247,9 @@ const EventCategory = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {eventCategories.length > 0 ? (
-                                        eventCategories.map((element, index) => {
-                                            const isLast = index === eventCategories.length - 1;
+                                    {organizers.length > 0 ? (
+                                        organizers.map((element, index) => {
+                                            const isLast = index === organizers.length - 1;
                                             const classes = isLast
                                                 ? "p-3"
                                                 : "p-3 border-b border-gray-300";
@@ -265,23 +271,52 @@ const EventCategory = () => {
                                                             variant="small"
                                                             className="font-normal text-gray-600 dark:text-white"
                                                         >
-                                                            {element.name}
+                                                            {element.organizationName}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            className="font-normal text-gray-600 dark:text-white"
+                                                        >
+                                                            {element.organizationAddress}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            className="font-normal text-gray-600 dark:text-white"
+                                                        >
+                                                            {element.fullName}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            className="font-normal text-gray-600 dark:text-white"
+                                                        >
+                                                            {element.email}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            className="font-normal text-gray-600 dark:text-white"
+                                                        >
+                                                            {element.phoneNo}
                                                         </Typography>
                                                     </td>
                                                     <td className={classes}>
                                                         <div className="flex items-center gap-2">
 
-                                                            <button
-                                                                onClick={() => {
-                                                                    setModalOpen(true);
-                                                                    setSelectedEventCategory(element);
-                                                                }}
+                                                            <Link
+                                                                to={`/admin/organizers/${element.id}`}
                                                                 className="text-2xl cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-200 dark:hover:text-blue-400"
                                                             >
-                                                                <CiEdit />
-                                                            </button>
+                                                                <FaRegEye  />
+                                                            </Link>
 
-                                                            <button
+                                                            {/* <button
                                                                 onClick={() => {
                                                                     setDeleteModalOpen(true);
                                                                     setSelectedEventCategory(element);
@@ -289,7 +324,7 @@ const EventCategory = () => {
                                                                 className="text-2xl cursor-pointer text-red-600 hover:text-red-800 ml-2"
                                                             >
                                                                 <MdDeleteOutline />
-                                                            </button>
+                                                            </button> */}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -307,7 +342,7 @@ const EventCategory = () => {
                         </Card>
                     </div>
                     <div className="mt-4">
-                        {eventCategories.length > 0 && (
+                        {organizers.length > 0 && (
                             <Pagination
                                 totalRecords={pagination.totalRecords}
                                 currentPage={pagination.currentPage}
@@ -320,13 +355,13 @@ const EventCategory = () => {
                 </>
             )}
 
-            <EventCategoryFormModal
+            {/* <EventCategoryFormModal
                 open={modalOpen}
                 onClose={handleModalClose}
                 loading={loading}
                 setLoading={setLoading}
                 selectedDataForEdit={selectedEventCategory}
-                fetchData={fetchData} />
+                fetchData={fetchData} /> */}
 
             <ConfirmModal
                 open={deleteModalOpen}
@@ -336,4 +371,4 @@ const EventCategory = () => {
     );
 };
 
-export default EventCategory;
+export default PendingOrganizer;

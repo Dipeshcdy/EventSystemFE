@@ -8,6 +8,7 @@ import { MdMailOutline } from "react-icons/md";
 import { Link } from 'react-router-dom';
 import Loader from '../common/Loader';
 import { FaBars } from "react-icons/fa";
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -15,6 +16,10 @@ const Home = () => {
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     }
+    const { accessToken,handleRedirect} = useAuth();
+      if (accessToken) {
+        handleRedirect();
+      }
     useEffect(() => {
         const img = new Image();
         img.src = bg;

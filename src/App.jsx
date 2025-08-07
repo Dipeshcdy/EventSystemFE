@@ -9,6 +9,8 @@ import ProtectedRoute from "./route/ProtectedRoute";
 import { Roles } from "./constants/constants";
 import AdminRoutes from "./route/AdminRoutes";
 import OrganizerRegister from "./pages/OrganizerRegister";
+import VerifyEmail from "./pages/VerifyEmail";
+import OrganizerRoutes from "./route/OrganizerRoutes";
 function App() {
   return (
     <>
@@ -17,6 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/organizer" element={<OrganizerRegister />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/setup" element={<OrganizationSetup />} />
         <Route path="/reset-password" element={<ResetPassword/>} />
          {/* Admin Routes */}
@@ -28,11 +31,11 @@ function App() {
         </Route>
 
          {/* Organizer Routes */}
-        {/* <Route element={<ProtectedRoute allowedRoles={[Roles.Organizer]} />}>
+        <Route element={<ProtectedRoute allowedRoles={[Roles.Organizer]} />}>
           <Route element={<Layout />}>
             <Route path="/organizer/*" element={<OrganizerRoutes />} />
           </Route>
-        </Route> */}
+        </Route>
 
         {/* User Routes */}
         {/* <Route element={<ProtectedRoute allowedRoles={[Roles.User]} />}>
