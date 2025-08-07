@@ -1,472 +1,806 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FaXmark } from "react-icons/fa6";
 import Select from "react-tailwindcss-select";
 import { CiTrash } from "react-icons/ci";
-import { getToken, logout } from '../../../utils/jwtUtils';
-import toast from 'react-hot-toast';
-import axiosInstance from '../../../services/axios';
-import { useAuth } from '../../../context/AuthContext';
+import { getToken, logout } from "../../../utils/jwtUtils";
+import toast from "react-hot-toast";
+import axiosInstance from "../../../services/axios";
+import { useAuth } from "../../../context/AuthContext";
+import ImageUploadInput from "../../../components/ImageUploadInput";
+import TextBox from "../../../components/TextBox";
+import ModalLayout from "../../../components/modal/ModalLayout";
+const initialEventState = {
+  termsAndConditions: "",
+  title: "",
+  description: "",
+  venue: "",
+  location: "",
+  startTime: "",
+  endTime: "",
+  startDate: "",
+  endDate: "",
+  bookingStart: "",
+  bookingEnd: "",
+  entryCloseTime: "",
+  image: null,
+  images: [],
+  latitude: "",
+  longitude: "",
+  capacity: "",
+  eventCategories: null,
+  eventTicketType: [{ name: "", price: "" }],
+};
 const EventForm = () => {
-    const { id } = useParams();
-    const { setActivePage, setActiveSubMenu, loading, setLoading } = useAuth();
-    const [pageLoading, setPageLoading] = useState(true); // 🔹 Local loading
-    setActivePage("menu");
-    setActiveSubMenu("");
-    const apiKey = import.meta.env["VITE_APP_BASE_URL"];
-    const token = getToken();
-    const navigate = useNavigate();
-    const [category, setCategory] = useState(null);
-    const [image, setImage] = useState(null);
-    const [options, setOptions] = useState([]);
-    const [file, setFile] = useState(null)
-    const [itemName, setItemName] = useState("");
-    const [itemPrice, setItemPrice] = useState("");
-    const [categories, setCategories] = useState([]);
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        const fetchData = async () => {
-            setLoading(true);
-            await fetchCategories();
-            if (id) {
-                await fetchMenu();
-            }
-            setTimeout(() => {
-                setLoading(false);
-                setPageLoading(false);
-            }, 500);
-        }
-        fetchData();
-    }, []);
-
-
-    // Function to handle adding options
-    const handleAddOption = (e) => {
-        e.preventDefault();
-        setOptions((prevOptions) => [...prevOptions, { optionName: "", optionPrice: "" }]);
+  const { id } = useParams();
+  const { setActivePage, setActiveSubMenu, loading, setLoading } = useAuth();
+  const [pageLoading, setPageLoading] = useState(true); // 🔹 Local loading
+  setActivePage("menu");
+  setActiveSubMenu("");
+  const apiKey = import.meta.env["VITE_APP_BASE_URL"];
+  const [formData, setFormData] = useState(initialEventState);
+  const [formErrors, setFormErrors] = useState({
+    eventTicketType: initialEventState.eventTicketType.map(() => ({})),
+  });
+  const [categories, setCategories] = useState([]);
+  const [customCategoryModalOpen, setCustomCategoryModalOpen] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState("");
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchCategories();
+      //   if (id) {
+      //     await fetchEvent();
+      //   }
+      setTimeout(() => {
+        setLoading(false);
+        setPageLoading(false);
+      }, 500);
     };
-    const [isDragging, setIsDragging] = useState(false);
-    // Handle drag events
-    const handleDragOver = (event) => {
-        event.preventDefault();
-        setIsDragging(true);
-    };
+    fetchData();
+  }, []);
 
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
+  const fetchCategories = async () => {
+    try {
+      const response = await axiosInstance.get(`${apiKey}api/eventcategory`);
+      if (response.status == 200) {
+        console.log(response);
+        var filteredCategories = response.data.data.items.map((item) => ({
+          value: item.id,
+          label: item.name,
+        }));
+        setCategories(filteredCategories);
+      }
+    } catch (error) {}
+  };
 
-    const handleDrop = (event) => {
-        event.preventDefault(); // Prevent default behavior
-        const files = event.dataTransfer.files; // Access the files
-        setIsDragging(false);
-        if (files.length > 0) {
-            const file = files[0]; // Get the first file
+  const validateInputField = (fieldName, value) => {
+    let message = "";
+    const trimmed = value?.toString().trim();
 
-            // Validate that the file is an image
-            const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-            if (validImageTypes.includes(file.type)) {
-                setFile(file);
-                const reader = new FileReader();
+    switch (fieldName) {
+      case "termsAndConditions":
+      case "title":
+      case "description":
+      case "venue":
+      case "location":
+        if (!trimmed)
+          message = `${fieldName.replace(/([A-Z])/g, " $1")} is required`;
+        break;
 
-                // Read the selected file and set it to state
-                reader.onloadend = () => {
-                    setImage(reader.result); // Set the image data URL
-                };
+      case "startDate":
+      case "endDate":
+        if (!trimmed)
+          message = `${fieldName.replace(/([A-Z])/g, " $1")} is required`;
+        else if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed))
+          message = "Invalid date format (expected yyyy-MM-dd)";
+        break;
 
-                reader.readAsDataURL(file);
-            } else {
-                toast.error('Invalid file type. Please upload a PNG or JPEG image.');
-            }
-        }
-    };
+      case "startTime":
+      case "endTime":
+      case "entryCloseTime":
+        if (trimmed && !/^\d{2}:\d{2}$/.test(trimmed))
+          message = "Invalid time format (expected HH:mm)";
+        break;
 
-    // Handle file selection
-    const handleImageChange = (e) => {
-        const selectedFile = e.target.files[0];
+      case "bookingStart":
+      case "bookingEnd":
+        if (!trimmed)
+          message = `${fieldName.replace(/([A-Z])/g, " $1")} is required`;
+        else if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed))
+          message = "Invalid datetime format (expected yyyy-MM-ddTHH:mm)";
+        break;
 
-        if (selectedFile) {
-            // Validate file type
-            const validImageTypes = ["image/png", "image/jpeg", "image/jpg"];
-            if (validImageTypes.includes(selectedFile.type)) {
-                setFile(selectedFile); // Set the file for API submission
+      case "latitude":
+      case "longitude":
+        if (!trimmed)
+          message = `${fieldName.replace(/([A-Z])/g, " $1")} is required`;
+        else if (isNaN(Number(trimmed)))
+          message = `${fieldName.replace(/([A-Z])/g, " $1")} must be a number`;
+        break;
 
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImage(reader.result); // Set the preview URL
-                };
-                reader.readAsDataURL(selectedFile);
-            } else {
-                toast.error("Invalid file type. Please upload a PNG or JPEG image.");
-            }
-        }
-    };
-    const handleCategoryChange = value => {
-        setCategory(value);
+      case "capacity":
+        if (!trimmed) message = "Capacity is required";
+        else if (!/^\d+$/.test(trimmed))
+          message = "Capacity must be a positive integer";
+        break;
+
+      case "eventCategoryId":
+        if (!trimmed) message = "Event Category is required";
+        break;
+
+      default:
+        // Optional generic required check
+        if (!trimmed)
+          message = `${fieldName.replace(/([A-Z])/g, " $1")} is required`;
+        break;
     }
 
-    const handleDeleteOption = (index) => {
-        setOptions((prevOptions) => prevOptions.filter((_, i) => i !== index));
-    };
+    setFormErrors((prev) => ({ ...prev, [fieldName]: message }));
+  };
 
-    const handleOptionChange = (index, field, value) => {
-        setOptions((prevOptions) =>
-            prevOptions.map((option, i) =>
-                i === index ? { ...option, [field]: value } : option
-            )
+  const handleInputChange = (field) => (valueOrEvent) => {
+    let value = valueOrEvent;
+    console.log(value);
+
+    // Handle file inputs (single or multiple)
+    if (valueOrEvent?.target) {
+      const target = valueOrEvent.target;
+
+      if (field === "image" && target.files?.[0]) {
+        value = target.files[0];
+      } else if (field === "images" && target.files?.length > 0) {
+        value = Array.from(target.files); // multiple files as array
+      } else {
+        value = target.value;
+      }
+    }
+
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Validate on change only fields relevant to event form
+    if (
+      [
+        "termsAndConditions",
+        "title",
+        "description",
+        "venue",
+        "location",
+        "startTime",
+        "endTime",
+        "startDate",
+        "endDate",
+        "bookingStart",
+        "bookingEnd",
+        "entryCloseTime",
+        "latitude",
+        "longitude",
+        "capacity",
+        "eventCategoryId",
+        "eventTicketType",
+      ].includes(field)
+    ) {
+      validateInputField(field, value);
+    }
+  };
+  const handleInputBlur = (field) => (e) => {
+    const value = e.target ? e.target.value : e;
+    validateInputField(field, value);
+  };
+  const addTicket = () => {
+    setFormData((prev) => ({
+      ...prev,
+      eventTicketType: [...prev.eventTicketType, { name: "", price: "" }],
+    }));
+  };
+
+  const removeTicket = (index) => {
+    const updatedTickets = [...formData.eventTicketType];
+    updatedTickets.splice(index, 1);
+    setFormData((prev) => ({
+      ...prev,
+      eventTicketType: updatedTickets.length
+        ? updatedTickets
+        : [{ name: "", price: "" }],
+    }));
+    setFormErrors((prev) => ({
+      ...prev,
+      eventTicketType: updatedTickets.length
+        ? updatedTickets.map(() => ({}))
+        : [{}],
+    }));
+  };
+
+  const handleCategoryChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      eventCategories: value,
+    }));
+  };
+
+  const handleTicketInputChange = (index, field) => (e) => {
+    const value = e.target.value;
+    const updatedTickets = [...formData.eventTicketType];
+    updatedTickets[index][field] = value;
+
+    setFormData((prev) => ({
+      ...prev,
+      eventTicketType: updatedTickets,
+    }));
+
+    // Safely clear error
+    const updatedErrors = [...(formErrors.eventTicketType || [])];
+    if (!updatedErrors[index]) updatedErrors[index] = {};
+    updatedErrors[index][field] = "";
+
+    setFormErrors((prev) => ({
+      ...prev,
+      eventTicketType: updatedErrors,
+    }));
+  };
+
+  const handleTicketInputBlur = (index, field) => (e) => {
+    const value = e.target.value.trim();
+    const updatedErrors = [...(formErrors.eventTicketType || [])];
+    if (!updatedErrors[index]) updatedErrors[index] = {};
+
+    // Validate "name"
+    if (field === "name") {
+      if (value === "") {
+        updatedErrors[index][field] = "Name is required.";
+      } else {
+        const duplicate = formData.eventTicketType.some(
+          (ticket, i) =>
+            i !== index && ticket.name?.toLowerCase() === value.toLowerCase()
         );
-    };
-
-
-    const isValidDecimal = (value) => {
-        const decimalRegex = /^\d*\.?\d*$/; // Allow only numbers and one decimal point
-        return decimalRegex.test(value);
-    };
-
-    // Main onChange handler for optionPrice
-    const handleOptionPriceChange = (index, value) => {
-        if (isValidDecimal(value)) {
-            handleOptionChange(index, "optionPrice", value);
+        if (duplicate) {
+          updatedErrors[index][field] = "Ticket type already exists.";
+        } else {
+          updatedErrors[index][field] = "";
         }
-    };
-
-
-    const fetchCategories = async () => {
-        try {
-            const response = await axiosInstance.get(`${apiKey}api/category`);
-            if (response.status == 200) {
-                var filteredCategories = response.data.data.map(item => ({
-                    value: item.id,
-                    label: item.name
-                }));
-                setCategories(filteredCategories);
-            }
-        } catch (error) {
-            if (error.response) {
-                var errorMessage = error.response.data.message;
-                toast.error(errorMessage);
-            } else if (error.message) {
-                console.log("Error", error.message);
-                toast.error("Error", error.message);
-            } else {
-                toast.error(error);
-                console.log("Error", error);
-            }
-        }
+      }
     }
 
-
-    const fetchMenu = async () => {
-        try {
-            const response = await axiosInstance.get(`${apiKey}api/menu/${id}`);
-            if (response.status == 200) {
-                const menu = response.data.data;
-                setItemName(menu.itemName);
-                setItemPrice(menu.itemPrice);
-                if (menu.imageUrl) {
-                    setImage(`${menu.imageUrl}`);
-                }
-                setOptions(menu.menuOptions);
-                console.log(menu)
-                const existingCategory = {
-                    value: menu.categoryId,
-                    label: menu.categoryName
-                }
-                setCategory(existingCategory);
-            }
-        } catch (error) {
-            if (error.response) {
-                var errorMessage = error.response.data.message;
-                toast.error(errorMessage);
-            } else if (error.message) {
-                console.log("Error", error.message);
-                toast.error("Error", error.message);
-            } else {
-                toast.error(error);
-                console.log("Error", error);
-            }
-        }
+    // Validate "price" using regex
+    else if (field === "price") {
+      const priceRegex = /^\d+(\.\d{1,2})?$/;
+      if (!priceRegex.test(value)) {
+        updatedErrors[index][field] =
+          "Enter a valid price (e.g., 100 or 99.99)";
+      } else {
+        updatedErrors[index][field] = "";
+      }
     }
 
-    const validateForm = () => {
-        if (
-            itemName.trim() === "" ||
-            !itemPrice ||
-            !category
-        ) {
-            toast.error("Please fill all fields");
-            return false;
-        }
-        return true;
+    setFormErrors((prev) => ({
+      ...prev,
+      eventTicketType: updatedErrors,
+    }));
+  };
+
+  // Form validation before submit
+  const validateForm = () => {
+    const fieldsToValidate = [
+      "termsAndConditions",
+      "title",
+      "description",
+      "venue",
+      "location",
+      "startTime",
+      "endTime",
+      "startDate",
+      "endDate",
+      "bookingStart",
+      "bookingEnd",
+      "latitude",
+      "longitude",
+      "capacity",
+      "eventCategoryId",
+      "eventTicketType",
+    ];
+
+    let valid = true;
+    fieldsToValidate.forEach((field) => {
+      validateInputField(field, formData[field]);
+      if (formErrors[field]) valid = false;
+    });
+
+    // Also check eventTicketType individually
+    if (
+      !formData.eventTicketType ||
+      formData.eventTicketType.length === 0 ||
+      formData.eventTicketType.some(
+        (t) =>
+          !t.name ||
+          t.name.trim() === "" ||
+          isNaN(t.price) ||
+          Number(t.price) < 0
+      )
+    ) {
+      toast.error("Please fix ticket types errors");
+      valid = false;
+    }
+
+    return valid;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      toast.error("Please fix errors before submitting");
+      return;
+    }
+
+    const data = new FormData();
+    data.append("Title", formData.title);
+    data.append("Description", formData.description);
+    data.append("Venue", formData.venue);
+    data.append("Location", formData.location);
+    data.append("TermsAndConditions", formData.termsAndConditions);
+    data.append("StartTime", formData.startTime);
+    data.append("EndTime", formData.endTime);
+    data.append("StartDate", formData.startDate);
+    data.append("EndDate", formData.endDate);
+    data.append("BookingStart", formData.bookingStart);
+    data.append("BookingEnd", formData.bookingEnd);
+    if (formData.entryCloseTime)
+      data.append("EntryCloseTime", formData.entryCloseTime);
+    data.append("Latitude", formData.latitude);
+    data.append("Longitude", formData.longitude);
+    data.append("Capacity", formData.capacity);
+    data.append("EventCategoryId", formData.eventCategoryId);
+
+    if (formData.image) {
+      data.append("Image", formData.image);
+    }
+
+    if (formData.images?.length) {
+      formData.images.forEach((img) => {
+        data.append("Images", img);
+      });
+    }
+
+    // Ticket types - serialize as JSON
+    data.append("EventTicketType", JSON.stringify(formData.eventTicketType));
+
+    try {
+      setLoading(true);
+      const response = await axios.post(`${apiKey}api/events/create`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success(response.data.message);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCustomCategoryAdd = () => {
+    const trimmed = customCategoryName.trim();
+    const alreadyExists = categories.some(
+      (cat) => cat.label.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (alreadyExists) {
+      setFormErrors((prev) => ({
+        ...prev,
+        customCategoryName: "Already Exists",
+      }));
+      return;
+    }
+    const newCategory = {
+      label: trimmed,
+      value: trimmed, // Use label as value for non-backend items
+      isCustom: true,
     };
+    setCategories((prev) => [...prev, newCategory]);
+    setCustomCategoryModalOpen(false);
+    setCustomCategoryName(""); // reset input
+    setFormErrors((prev) => ({ ...prev, customCategoryName: "" })); // clear error
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleCustomCategoryModalClose = () => {
+    setCustomCategoryModalOpen(false);
+    setCustomCategoryName(""); // reset input
+    setFormErrors((prev) => ({ ...prev, customCategoryName: "" })); // clear error
+  };
 
-        if (!validateForm()) {
-            return;
-        }
-         if (Array.isArray(options) && options.length > 0) {
-            const hasInvalid = options.some(
-                (opt) => !opt.optionName?.trim() || !opt.optionPrice?.toString().trim()
-            );
-            if (hasInvalid) {
-                toast.error("All options must have a title and price filled.");
-                return;
-            }
-        }
-        const formData = new FormData();
-        if (id) {
-            formData.append("id", id);
-        }
-        formData.append("ItemName", itemName);
-        formData.append("ItemPrice", itemPrice);
-        formData.append("CategoryId", category.value);
-        formData.append("Image", file);
+  const handleImageChange = (e) => {
+  const files = Array.from(e.target.files);
+  setFormData((prev) => ({
+    ...prev,
+    eventImages: [...prev.eventImages, ...files],
+  }));
+};
 
-        options.forEach((option, index) => {
-            formData.append(`MenuOptions[${index}][optionName]`, option.optionName);
-            formData.append(`MenuOptions[${index}][optionPrice]`, option.optionPrice);
-            if (option.id) {
-                formData.append(`MenuOptions[${index}][id]`, option.id);
-            }
-        });
-        const method = id ? "put" : "post";
-        const url = `${apiKey}api/menu`;
-        setLoading(true);
-        try {
-            const response = await axiosInstance({
-                method,
-                url,
-                data: formData,
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                setLoading(false);
-                navigate("/product-management");
-            }
-        } catch (error) {
-            if (error.response) {
-                var errorMessage = error.response.data.message;
-                toast.error(errorMessage);
-            } else if (error.message) {
-                console.log("Error", error.message);
-                toast.error("Error", error.message);
-            } else {
-                toast.error(error);
-                console.log("Error", error);
-            }
-        }
-        finally{
-            setLoading(false);
-        }
+const removeImage = (index) => {
+  setFormData((prev) => {
+    const updatedImages = [...prev.eventImages];
+    updatedImages.splice(index, 1);
+    return {
+      ...prev,
+      eventImages: updatedImages,
     };
+  });
+};
 
 
 
-    return (
+  return (
+    <>
+      {!loading && !pageLoading && (
         <>
-            {!loading && !pageLoading && (
-                <>
-                    <div className="">
-                        <div>
-                            <h2 className="text-sm inline-block border-b-2 border-gray-400">
-                                {id ? "Edit" : "Add"} Menu Item
-                            </h2>
-                        </div>
-                    </div>
-                    <div className="mt-5">
-                        <form action="">
-                            <div className="mt-5">
-                                {image ? <>
-                                    <div className="flex items-center justify-center mt-">
-                                        <div className="relative h-64">
-                                            <img src={image} className="h-full object-contain rounded-lg" alt="" />
-                                            <div className="absolute -top-4 -right-4">
-                                                <FaXmark onClick={() => { setImage(null) }} className="text-red-400 text-xl hover:text-red-600 cursor-pointer" title="Delete Image" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </> : <>
-                                    <div className="flex items-center justify-center w-full">
-                                        <label htmlFor='dropzone-file'
-                                            className={`flex flex-col items-center justify-center w-full h-64 border-2 ${isDragging ? "border-blue-500 bg-blue-100" : "border-gray-300 bg-gray-50"
-                                                } border-dashed rounded-lg cursor-pointer  dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600`}
-                                            onDragOver={handleDragOver}
-                                            onDragLeave={handleDragLeave}
-                                            onDrop={handleDrop}
-                                        >
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <svg
-                                                    className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                                    aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 20 16"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                                    />
-                                                </svg>
-                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                                    <span className="font-semibold">Click to upload</span> or drag and
-                                                    drop
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    PNG, JPG, JPEG (MAX. 800x400px)
-                                                </p>
-                                            </div>
-                                            <input
-                                                id="dropzone-file"
-                                                type="file"
-                                                onChange={handleImageChange}
-                                                className="hidden"
-                                                accept=".png, .jpg, .jpeg"
-                                            />
-                                        </label>
-                                    </div>
-                                </>}
+          <div className="">
+            <div>
+              <h2 className="text-sm inline-block border-b-2 border-gray-400">
+                {id ? "Edit" : "Create"} Event
+              </h2>
+            </div>
+          </div>
+          <div className="mt-5">
+            <form action="">
+              <div className="mt-5">
+                <ImageUploadInput
+                  setFile={handleInputChange("image")}
+                  customKey="image"
+                  error={formErrors.image}
+                />
+              </div>
+              <div className="grid md:grid-cols-3 gap-5 mt-5">
+                <TextBox
+                  value={formData.title}
+                  label="Title"
+                  onchange={handleInputChange("title")}
+                  onBlur={handleInputBlur("title")}
+                  error={formErrors.title}
+                />
+                <TextBox
+                  value={formData.venue}
+                  label="Venue"
+                  onchange={handleInputChange("venue")}
+                  onBlur={handleInputBlur("venue")}
+                  error={formErrors.venue}
+                />
+                <TextBox
+                  value={formData.location}
+                  label="Location"
+                  onchange={handleInputChange("location")}
+                  onBlur={handleInputBlur("location")}
+                  error={formErrors.location}
+                />
+                <TextBox
+                  value={formData.startTime}
+                  label="Start Time"
+                  onchange={handleInputChange("startTime")}
+                  onBlur={handleInputBlur("startTime")}
+                  error={formErrors.startTime}
+                  type="time"
+                />
+                <TextBox
+                  value={formData.endTime}
+                  label="End Time"
+                  onchange={handleInputChange("endTime")}
+                  onBlur={handleInputBlur("endTime")}
+                  error={formErrors.endTime}
+                  type="time"
+                />
+                <TextBox
+                  value={formData.startDate}
+                  label="Start Date"
+                  onchange={handleInputChange("startDate")}
+                  onBlur={handleInputBlur("startDate")}
+                  error={formErrors.startDate}
+                  type="date"
+                />
+                <TextBox
+                  value={formData.endDate}
+                  label="End Date"
+                  onchange={handleInputChange("endDate")}
+                  onBlur={handleInputBlur("endDate")}
+                  error={formErrors.endDate}
+                  type="date"
+                />
+                <TextBox
+                  value={formData.bookingStart}
+                  label="Booking Start"
+                  onchange={handleInputChange("bookingStart")}
+                  onBlur={handleInputBlur("bookingStart")}
+                  error={formErrors.bookingStart}
+                  type="datetime-local"
+                />
+                <TextBox
+                  value={formData.bookingEnd}
+                  label="Booking End"
+                  onchange={handleInputChange("bookingEnd")}
+                  onBlur={handleInputBlur("bookingEnd")}
+                  error={formErrors.bookingEnd}
+                  type="datetime-local"
+                />
+                <TextBox
+                  value={formData.entryCloseTime}
+                  label="Entry Close Time"
+                  onchange={handleInputChange("entryCloseTime")}
+                  onBlur={handleInputBlur("entryCloseTime")}
+                  error={formErrors.entryCloseTime}
+                  type="time"
+                />
 
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-5 mt-5">
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        id="guest_name"
-                                        className="block px-2.5 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-primary-light peer"
-                                        placeholder=" "
-                                        value={itemName}
-                                        onChange={(e) => { setItemName(e.target.value) }}
-                                    />
-                                    <label
-                                        htmlFor="guest_name"
-                                        className="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white dark:bg-black dark:text-white dark:peer-focus:text-blue-100 dark:peer-focus:outline-blue-200  px-2 peer-focus:px-2 peer-focus:text-primary-light  peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                                    >
-                                        Item Name
-                                    </label>
-                                </div>
-                                <div className="relative">
-                                    <Select
-                                        value={category}
-                                        classNames="block px-2.5 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-primary-light peer"
-                                        isSearchable={true}
-                                        onChange={handleCategoryChange}
-                                        options={categories}
-                                    />
-                                    <label
-                                        htmlFor="address"
-                                        className="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white  px-2 peer-focus:px-2 peer-focus:text-primary-light  peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                                    >
-                                        Category
-                                    </label>
-                                </div>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        id="guest_name"
-                                        // disabled={options.length > 0}
-                                        // readOnly={options.length > 0}
-                                        className="block px-2.5 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-primary-light peer"
-                                        placeholder=" "
-                                        value={itemPrice}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            if (/^\d*\.?\d*$/.test(value)) { // Allow only decimal values
-                                                setItemPrice(value);
-                                            }
-                                        }}
-                                    />
-                                    <label
-                                        htmlFor="guest_name"
-                                        className="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white dark:bg-black dark:text-white dark:peer-focus:text-blue-100 dark:peer-focus:outline-blue-200  px-2 peer-focus:px-2 peer-focus:text-primary-light  peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                                    >
-                                        Price
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
-                                <div className='flex justify-end my-5'>
-                                    <button type='button' onClick={handleAddOption} className="bg-blue-600 text-sm text-white py-1.5 px-4 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all ">
-                                        Add Options
-                                    </button>
-                                </div>
-                                <div className='grid grid-cols-2 gap-5'>
-                                    {options &&
-                                        options.map((option, index) => (
-                                            <div key={index} className="border border-gray-300 rounded-lg p-5 pt-3">
-                                                <div className="flex justify-end">
-                                                    <CiTrash onClick={() => { handleDeleteOption(index) }} className="text-xl text-red-600 cursor-pointer" />
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-5 mt-2">
-                                                    {/* Title Input */}
-                                                    <div className="relative">
-                                                        <input
-                                                            type="text"
-                                                            id={`guest_name_title_${index}`}
-                                                            className="block px-2.5 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary-light peer"
-                                                            placeholder=" "
-                                                            value={option.optionName}
-                                                            onChange={(e) => handleOptionChange(index, "optionName", e.target.value)}
-                                                        />
-                                                        <label
-                                                            htmlFor={`guest_name_title_${index}`}
-                                                            className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white dark:bg-black dark:text-white dark:peer-focus:text-blue-100 dark:peer-focus:outline-blue-200 px-2 peer-focus:px-2 peer-focus:text-primary-light peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                                                        >
-                                                            Title
-                                                        </label>
-                                                    </div>
+                <TextBox
+                  value={formData.latitude}
+                  label="Latitude"
+                  onchange={handleInputChange("latitude")}
+                  onBlur={handleInputBlur("latitude")}
+                  error={formErrors.latitude}
+                />
+                <TextBox
+                  value={formData.longitude}
+                  label="Longitude"
+                  onchange={handleInputChange("longitude")}
+                  onBlur={handleInputBlur("longitude")}
+                  error={formErrors.longitude}
+                />
+                <TextBox
+                  value={formData.capacity}
+                  label="Capacity"
+                  onchange={handleInputChange("capacity")}
+                  onBlur={handleInputBlur("capacity")}
+                  error={formErrors.capacity}
+                />
+              </div>
+              <div className="mt-5">
+                <div className="relative">
+                  <textarea
+                    type="text"
+                    id="website_url"
+                    className="block px-2.5 h-16 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-primary-light peer"
+                    placeholder=" "
+                    value={formData.description}
+                    onChange={handleInputChange("description")}
+                    onBlur={handleInputBlur("description")}
+                  ></textarea>
+                  <label
+                    htmlFor="website_url"
+                    className="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white dark:bg-black dark:text-white dark:peer-focus:text-blue-100 dark:peer-focus:outline-blue-200  px-2 peer-focus:px-2 peer-focus:text-primary-light  peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  >
+                    Description
+                  </label>
+                  {formErrors.description && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {formErrors.description}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-                                                    {/* Price Input */}
-                                                    <div className="relative">
-                                                        <input
-                                                            type="text"
-                                                            id={`guest_name_price_${index}`}
-                                                            className="block px-2.5 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-primary-light peer"
-                                                            placeholder=" "
-                                                            value={option.optionPrice}
-                                                            onChange={(e) => handleOptionPriceChange(index, e.target.value)}
-                                                        />
-                                                        <label
-                                                            htmlFor={`guest_name_price_${index}`}
-                                                            className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white dark:bg-black dark:text-white dark:peer-focus:text-blue-100 dark:peer-focus:outline-blue-200 px-2 peer-focus:px-2 peer-focus:text-primary-light peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                                                        >
-                                                            Price
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div className="flex justify-between mt-5">
-                        <div>
-                            <Link
-                                to="/product-management"
-                                className="py-1.5 px-9 border border-blue-600 rounded-xl text-gray-900 hover:bg-blue-50 transition-all duration-500"
-                            >
-                                Back To List
-                            </Link>
+              {/* Event Categories */}
+
+              <div className="my-8">
+                <div className="flex justify-between items-center my-5">
+                  <div>
+                    <h2 className="text-sm inline-block border-b-2 border-gray-400">
+                      Event Categories
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomCategoryModalOpen(true);
+                    }}
+                    className="bg-blue-600 text-sm text-white py-1.5 px-4 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all "
+                  >
+                    Add Custom Categories
+                  </button>
+                </div>
+                <div className="relative">
+                  <Select
+                    value={formData.eventCategories}
+                    // classNames="block px-2.5 pb-2 pt-3 w-full text-sm text-gray-900 bg-transparent rounded-lg border-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-primary-light peer"
+                    isMultiple={true}
+                    isSearchable={true}
+                    isClearable={true}
+                    formatOptionLabel={(data) => (
+                      <div className="p-2 text-xs flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-all duration-300 ease-linear">
+                        <span className="">{data.label}</span>
+                      </div>
+                    )}
+                    onChange={handleCategoryChange}
+                    options={categories}
+                    formatGroupLabel={(data) => (
+                      <div
+                        className={`py-2 text-xs flex items-center justify-between`}
+                      >
+                        <span className="font-bold">{data.label}</span>
+                        <span className="bg-gray-200 h-5 p-1.5 flex items-center justify-center rounded-full">
+                          {data.options.length}
+                        </span>
+                      </div>
+                    )}
+                  />
+                  <label
+                    for="extras"
+                    class="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-2 z-[1] origin-[0] bg-white  px-2 peer-focus:px-2 peer-focus:text-primary-light  peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  >
+                    Categories
+                  </label>
+                </div>
+              </div>
+              {/*End of Event Categories */}
+
+              {/* Event Ticket Types */}
+              <div>
+                <div className="flex justify-between items-center my-5">
+                  <div>
+                    <h2 className="text-sm inline-block border-b-2 border-gray-400">
+                      Event Tickets
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addTicket}
+                    className="bg-blue-600 text-sm text-white py-1.5 px-4 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all "
+                  >
+                    Add Ticket Types
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-5">
+                  {formData.eventTicketType &&
+                    formData.eventTicketType.map((option, index) => (
+                      <div
+                        key={index}
+                        className="border border-gray-300 rounded-lg p-5 pt-3"
+                      >
+                        <div className="flex justify-end">
+                          <CiTrash
+                            onClick={() => {
+                              removeTicket(index);
+                            }}
+                            className="text-xl text-red-600 cursor-pointer"
+                          />
                         </div>
-                        <div>
-                            <button onClick={handleSubmit} className="bg-blue-600 text-white py-1.5 px-9 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all">
-                                Save
-                            </button>
+                        <div className="grid grid-cols-2 gap-5 mt-2">
+                          <TextBox
+                            id={`tickettype_name_${index}`}
+                            value={option.name}
+                            label="Name"
+                            onchange={handleTicketInputChange(index, "name")}
+                            onBlur={handleTicketInputBlur(index, "name")}
+                            error={
+                              formErrors.eventTicketType[index]?.name || ""
+                            }
+                          />
+
+                          <TextBox
+                            id={`tickettype_price_${index}`}
+                            value={option.price}
+                            label="Price"
+                            onchange={handleTicketInputChange(index, "price")}
+                            onBlur={handleTicketInputBlur(index, "price")}
+                            error={
+                              formErrors.eventTicketType[index]?.price || ""
+                            }
+                          />
                         </div>
-                    </div>
-                </>)}
+                      </div>
+                    ))}
+                </div>
+              </div>
+              {/*End of Event Ticket Types */}
+
+              {/* Event Images */}
+              <div>
+                <div className="flex justify-between items-center my-5">
+                  <h2 className="text-sm inline-block border-b-2 border-gray-400">
+                    Event Images
+                  </h2>
+                  <label className="bg-blue-600 text-sm text-white py-1.5 px-4 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all cursor-pointer">
+                    Add Images
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      hidden
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files);
+                        const imagesWithPreview = files.map((file) => ({
+                          file,
+                          preview: URL.createObjectURL(file),
+                        }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          images: [
+                            ...prev.images,
+                            ...imagesWithPreview,
+                          ],
+                        }));
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {/* Preview Section */}
+                {formData.images.length > 0 && (
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
+                    {formData.images.map((img, idx) => (
+                      <div key={idx} className="relative group">
+                        <img
+                          src={img.preview}
+                          alt={`Event Image ${idx}`}
+                          className="rounded-lg w-full h-36 object-cover border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => {
+                              const updated = [...prev.images];
+                              URL.revokeObjectURL(updated[idx].preview); // clean memory
+                              updated.splice(idx, 1);
+                              return { ...prev, images: updated };
+                            });
+                          }}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-90 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </form>
+          </div>
+          <div className="flex justify-between mt-5">
+            <div>
+              <Link
+                to="/product-management"
+                className="py-1.5 px-9 border border-blue-600 rounded-xl text-gray-900 hover:bg-blue-50 transition-all duration-500"
+              >
+                Back To List
+              </Link>
+            </div>
+            <div>
+              <button
+                onClick={handleSubmit}
+                className="bg-blue-600 text-white py-1.5 px-9 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all"
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </>
-    )
-}
+      )}
 
-export default EventForm
+      <ModalLayout
+        open={customCategoryModalOpen}
+        onClose={handleCustomCategoryModalClose}
+        submit={handleCustomCategoryAdd}
+        className=""
+      >
+        <div className="p-5">
+          <div className="">
+            <h2 className="text-sm inline-block border-b-2 border-gray-400">
+              Add Custom Event Category
+            </h2>
+          </div>
+          <div className="mt-5">
+            <div className="mt-5 flex-grow">
+              <TextBox
+                value={customCategoryName}
+                label="Name"
+                onchange={(e) => {
+                  setCustomCategoryName(e.target.value);
+                }}
+                error={formErrors.customCategoryName}
+              />
+            </div>
+          </div>
+        </div>
+      </ModalLayout>
+    </>
+  );
+};
+
+export default EventForm;
