@@ -123,8 +123,8 @@ const Register = () => {
                           </div>
                           <h2 class="text-xl font-bold text-gray-800 mb-2">Register as User</h2>
                           <p class="text-gray-600 mb-6">Purchase Event Tickets and explore activities.</p>
-                          <a href="/register/user"
-                            class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Join Now</a>
+                         <Link to="/register/user"
+                            class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Join Now</Link>
                         </div>
                       </div>
 

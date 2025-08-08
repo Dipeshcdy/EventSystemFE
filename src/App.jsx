@@ -11,6 +11,7 @@ import AdminRoutes from "./route/AdminRoutes";
 import OrganizerRegister from "./pages/OrganizerRegister";
 import VerifyEmail from "./pages/VerifyEmail";
 import OrganizerRoutes from "./route/OrganizerRoutes";
+import UserRegister from "./pages/UserRegister";
 function App() {
   return (
     <>
@@ -19,6 +20,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/organizer" element={<OrganizerRegister />} />
+        <Route path="/register/user" element={<UserRegister />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/setup" element={<OrganizationSetup />} />
         <Route path="/reset-password" element={<ResetPassword/>} />

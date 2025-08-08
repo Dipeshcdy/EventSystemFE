@@ -19,7 +19,8 @@ const TABLE_HEAD = [
     { head: "Venue" },
     { head: "Start Date" },
     { head: "End Date" },
-    { head: "capacity" },
+    { head: "Capacity" },
+    { head: "Organizer" },
     { head: "Actions" },
 ];
 const pageSize = 5;
@@ -277,6 +278,14 @@ const EventList = ({status}) => {
                                                             className="font-normal text-gray-600 dark:text-white"
                                                         >
                                                             {element.capacity}
+                                                        </Typography>
+                                                    </td>
+                                                    <td className={classes}>
+                                                        <Typography
+                                                            variant="small"
+                                                            className="font-normal text-gray-600 dark:text-white"
+                                                        >
+                                                            {element.user.fullName}
                                                         </Typography>
                                                     </td>
                                                     <td className={classes}>
