@@ -24,8 +24,8 @@ dist-ssr
 *.sw?
 
 
-*.yml
-.github/workflows/firebase-hosting-pull-request.yml
-.env
-.env
-.env
+# *.yml
+# .github/workflows/firebase-hosting-pull-request.yml
+# .env
+# .env
+# .env
