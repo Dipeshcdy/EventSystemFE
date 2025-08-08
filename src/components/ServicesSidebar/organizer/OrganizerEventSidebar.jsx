@@ -58,12 +58,12 @@ const OrganizerEventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu 
                         <li>
                             <SidebarButton
                                 page=""
-                                subMenu="approvedEvents"
+                                subMenu="acceptedEvents"
                                 activeSubMenu={activeSubMenu}
-                                rroute="/organizer/event/approved"
+                                route="/organizer/event/accepted"
                             >
                                 <MdEditDocument className="text-xl" />
-                                <span className="ms-3">Approved Events</span>
+                                <span className="ms-3">Accepted Events</span>
                             </SidebarButton>
                         </li>
                         <li>
@@ -71,7 +71,7 @@ const OrganizerEventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu 
                                 page=""
                                 subMenu="rejectedEvents"
                                 activeSubMenu={activeSubMenu}
-                                rroute="/organizer/event/rejected"
+                                route="/organizer/event/rejected"
                             >
                                 <MdEditDocument className="text-xl" />
                                 <span className="ms-3">Rejected Events</span>

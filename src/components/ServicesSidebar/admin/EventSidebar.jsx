@@ -48,12 +48,34 @@ const EventSidebar = ({ active, activeSubMenu, openMenu, toggleSubmenu }) => {
                         <li>
                             <SidebarButton
                                 page=""
-                                subMenu="event"
+                                subMenu="pendingEvents"
                                 activeSubMenu={activeSubMenu}
-                                route="/admin/event"
+                                route="/admin/event/pending"
                             >
                                 <MdEditDocument className="text-xl" />
-                                <span className="ms-3">Events</span>
+                                <span className="ms-3">Pending Events</span>
+                            </SidebarButton>
+                        </li>
+                        <li>
+                            <SidebarButton
+                                page=""
+                                subMenu="acceptedEvents"
+                                activeSubMenu={activeSubMenu}
+                                route="/admin/event/accepted"
+                            >
+                                <MdEditDocument className="text-xl" />
+                                <span className="ms-3">Accepted Events</span>
+                            </SidebarButton>
+                        </li>
+                        <li>
+                            <SidebarButton
+                                page=""
+                                subMenu="rejectedEvents"
+                                activeSubMenu={activeSubMenu}
+                                route="/admin/event/rejected"
+                            >
+                                <MdEditDocument className="text-xl" />
+                                <span className="ms-3">Rejected Events</span>
                             </SidebarButton>
                         </li>
                     </div>
