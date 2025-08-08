@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
           navigate("/organizer/dashboard");
           break;
         case Roles.User:
-          navigate("/user/dashboard");
+          navigate("/");
           break;
         default:
           navigate("/login");

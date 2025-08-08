@@ -12,19 +12,20 @@ import OrganizerRegister from "./pages/OrganizerRegister";
 import VerifyEmail from "./pages/VerifyEmail";
 import OrganizerRoutes from "./route/OrganizerRoutes";
 import UserRegister from "./pages/UserRegister";
+import UserRoutes from "./route/UserRoutes";
+import UserLayout from "./components/User/Includes/UserLayout";
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/organizer" element={<OrganizerRegister />} />
         <Route path="/register/user" element={<UserRegister />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/setup" element={<OrganizationSetup />} />
-        <Route path="/reset-password" element={<ResetPassword/>} />
-         {/* Admin Routes */}
+        <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Admin Routes */}
         <Route element={<ProtectedRoute allowedRoles={[Roles.Admin]} />}>
           <Route element={<Layout />}>
             {/* Example: /admin/dashboard */}
@@ -32,11 +33,18 @@ function App() {
           </Route>
         </Route>
 
-         {/* Organizer Routes */}
+        {/* Organizer Routes */}
         <Route element={<ProtectedRoute allowedRoles={[Roles.Organizer]} />}>
           <Route element={<Layout />}>
             <Route path="/organizer/*" element={<OrganizerRoutes />} />
           </Route>
+        </Route>
+
+        <Route element={<UserLayout />}>
+          <Route element={<ProtectedRoute allowedRoles={[Roles.User]} />}>
+            {UserRoutes()}
+          </Route>
+          <Route path="/" element={<Home />} />
         </Route>
 
         {/* User Routes */}
