@@ -5,16 +5,19 @@ import { Outlet } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 
 const UserLayout = () => {
-  const { loading } = useAuth();
+  const { accessToken, loading ,handleRedirect} = useAuth();
+  if (accessToken) {
+    handleRedirect(true);
+  }
   return (
     <>
-        <>
-          <Nav />
-          <div className="pb-20">
-            <Outlet />
-          </div>
-          <Footer />
-        </>
+      <>
+        <Nav />
+        <div className="pb-20">
+          <Outlet />
+        </div>
+        <Footer />
+      </>
     </>
   );
 };

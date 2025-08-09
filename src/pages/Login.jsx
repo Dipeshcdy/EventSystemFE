@@ -45,6 +45,9 @@ const Login = () => {
       );
       if (response.status === 200) {
         setAccessToken(response.data.data.token);
+       setTimeout(() => {
+         handleRedirect();
+       }, 100);
       }
     } catch (error) {
       console.log(error);

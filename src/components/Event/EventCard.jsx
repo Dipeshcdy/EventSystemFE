@@ -3,15 +3,8 @@ import { IoLocationOutline, IoPricetagOutline } from "react-icons/io5";
 import { IoCalendarOutline } from "react-icons/io5";
 import formatNepaliCurrency from "../../utils/utils";
 import { Link } from "react-router-dom";
+import { formatDate } from "../../utils/dateFormatter";
 
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 const EventCard = ({ element }) => {
   const apiKey = import.meta.env["VITE_APP_BASE_URL"];
@@ -122,10 +115,10 @@ const EventCard = ({ element }) => {
                 Buy Ticket
               </button>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 ">
                 <Link
                     to={`/event/${element.id}`}
-                  className="bg-gray-500 text-white py-1.5 px-9 w-full rounded-xl border border-gray-500 cursor-not-allowed"
+                  className="bg-blue-600 text-white py-1.5 px-9 w-full rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all"
                   type="button"
                 >
                   View Details

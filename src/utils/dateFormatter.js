@@ -17,3 +17,32 @@ export function formatDateToLocal(dateString, options = {}) {
     return '';
   }
 }
+
+
+
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export const formatTime = (time) => {
+  return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  
+};
+
+export const formatTimeWithDateTime = (dateTime) => {
+  const date = new Date(dateTime);
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true // AM/PM format
+  });
+};
