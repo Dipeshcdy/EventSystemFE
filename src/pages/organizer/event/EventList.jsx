@@ -12,6 +12,7 @@ import ConfirmModal from "../../../components/modal/ConfirmModal";
 import { FaRegEye } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import defaultImage from "../../../images/default.webp";
+import { TbUserScan } from "react-icons/tb";
 const TABLE_HEAD = [
   { head: "SN" },
   { head: "Image" },
@@ -281,6 +282,14 @@ const EventList = ({ status }) => {
                           </td>
                           <td className={classes}>
                             <div className="flex items-center gap-2">
+                              {status == "Accepted" && (
+                                <Link
+                                  to={`/organizer/event/${element.id}/scanning-users`}
+                                  className="text-2xl cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-200 dark:hover:text-blue-400"
+                                >
+                                  <TbUserScan />
+                                </Link>
+                              )}
                               {status !== "Accepted" && (
                                 <Link
                                   to={`/organizer/event/${element.id}`}

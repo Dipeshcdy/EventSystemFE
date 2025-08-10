@@ -7,6 +7,7 @@ import AcceptedEvent from "../pages/organizer/event/AcceptedEvent";
 import RejectedEvent from "../pages/organizer/event/RejectedEvent";
 import ViewEvent from "../pages/organizer/event/ViewEvent";
 import EditEvent from "../pages/organizer/event/EditEvent";
+import EventScanningUsers from "../pages/organizer/event/EventScanningUsers";
 
 const OrganizerRoutes = () => (
   <Routes>
@@ -18,6 +19,7 @@ const OrganizerRoutes = () => (
     <Route path="event/pending" element={<PendingEvent />} />
     <Route path="event/accepted" element={<AcceptedEvent />} />
     <Route path="event/rejected" element={<RejectedEvent />} />
+    <Route path="event/:eventId/scanning-users" element={<EventScanningUsers />} />
   </Routes>
 );
 

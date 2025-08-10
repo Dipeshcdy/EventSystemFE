@@ -76,7 +76,7 @@ const EventCategoryFormModal = ({ open, onClose, loading, setLoading, selectedDa
 
 
         if (!name.trim()) {
-            errors.name = "Client name is required";
+            errors.name = "Name is required";
             isValid = false;
         }
         // Update the error state (so each <TextBox /> can render error)
