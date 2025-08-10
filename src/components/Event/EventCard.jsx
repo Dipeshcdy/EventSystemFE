@@ -5,7 +5,6 @@ import formatNepaliCurrency from "../../utils/utils";
 import { Link } from "react-router-dom";
 import { formatDate } from "../../utils/dateFormatter";
 
-
 const EventCard = ({ element }) => {
   const apiKey = import.meta.env["VITE_APP_BASE_URL"];
 
@@ -108,16 +107,17 @@ const EventCard = ({ element }) => {
 
           <div className="pt-3">
             {isBookingOpen() ? (
-              <button
+              <Link
+                to={`/event/${element.id}`}
                 className="bg-blue-600 text-white py-1.5 px-9 w-full rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all"
                 type="button"
               >
                 Buy Ticket
-              </button>
+              </Link>
             ) : (
               <div className="space-y-2 ">
                 <Link
-                    to={`/event/${element.id}`}
+                  to={`/event/${element.id}`}
                   className="bg-blue-600 text-white py-1.5 px-9 w-full rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all"
                   type="button"
                 >

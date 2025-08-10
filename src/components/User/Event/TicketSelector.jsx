@@ -60,7 +60,7 @@ const TicketSelector = ({ event }) => {
   };
 
   const khaltiCall = (data) => {
-    window.location.href = data.payment_url;
+    window.location.href = data.paymentUrl;
   };
 
   return (
