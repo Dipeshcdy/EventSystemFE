@@ -58,6 +58,9 @@ const Nav = () => {
             <li>
               <Link to="/events">Events</Link>
             </li>
+            <li>
+              <Link to="/mytickets">Tickets</Link>
+            </li>
             <li>Contact</li>
           </ul>
         </div>

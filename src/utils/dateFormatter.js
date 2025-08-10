@@ -29,6 +29,19 @@ export function formatDate(date) {
   });
 }
 
+export function extractDayMonth(date) {
+  return new Date(date).toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+  });
+}
+
+export function extractYear(date) {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+  });
+}
+
 export const formatTime = (time) => {
   return new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
     hour: "2-digit",
