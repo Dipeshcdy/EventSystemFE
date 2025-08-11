@@ -8,6 +8,9 @@ import { FaRegEye, FaSquarePlus } from "react-icons/fa6";
 import { MdDeleteOutline } from "react-icons/md";
 import { Card, Typography } from "@material-tailwind/react";
 import EventScanningUsersFormModal from "../../../components/modal/EventScanningUsers/EventScanningUsersFormModal";
+import { TbLockPassword } from "react-icons/tb";
+import toast from "react-hot-toast";
+import ConfirmModal from "../../../components/modal/ConfirmModal";
 const TABLE_HEAD = [
     { head: "SN" },
     { head: "Full Name" },
@@ -19,7 +22,7 @@ const EventScanningUsers = () => {
     const { setActivePage, setActiveSubMenu } = useAuth();
     setActivePage("organizerEvents");
     setActiveSubMenu("acceptedEvents");
-    const { loading,setLoading } = useAuth();
+    const { loading, setLoading } = useAuth();
     const [pageLoading, setPageLoading] = useState(true);
     const apiKey = import.meta.env["VITE_APP_BASE_URL"];
     // const [search, setSearch] = useState("");
@@ -73,30 +76,31 @@ const EventScanningUsers = () => {
         } catch (error) { }
     };
     //fetch category
-    const [addModalOpen, setAddModalOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [modalMode, setModalMode] = useState("add");
+    const [selectedUser, setSelectedUser] = useState(null);
 
     const handleDeleteModalClose = () => {
         setDeleteModalOpen(false);
-        setSelectedEvent(null);
+        setSelectedUser(null);
     };
 
     const handleDelete = async () => {
-        const eventId = selectedEvent?.id;
+        const userId = selectedUser?.id;
 
-        if (!eventId) {
-            toast.error("Something went wrong. Client ID is missing.");
+        if (!userId) {
+            toast.error("Something went wrong. User ID is missing.");
             return;
         }
         setLoading(true);
-        const url = `${apiKey}api/event/${eventId}`;
+        const url = `${apiKey}api/ScanningUser/${eventId}/scanning-users/${userId}`;
         try {
             const response = await axiosInstance.delete(url);
             if (response.status === 200) {
                 toast.success(response.data.message);
                 handleDeleteModalClose();
-                setEvents((prev) => prev.filter((e) => e.id !== eventId));
+                setUsers((prev) => prev.filter((e) => e.id !== userId));
             }
         } catch (error) {
         } finally {
@@ -107,7 +111,7 @@ const EventScanningUsers = () => {
     };
 
     const handleAddModalClose = () => {
-        setAddModalOpen(false);
+        setModalOpen(false);
     }
 
     return (
@@ -142,7 +146,9 @@ const EventScanningUsers = () => {
                             <div>
                                 <button
                                     onClick={() => {
-                                        setAddModalOpen(true);
+                                        setModalMode("add");
+                                        setSelectedUser(null);
+                                        setModalOpen(true);
                                     }}
                                     className="bg-blue-600 text-sm text-white py-1.5 px-9 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all flex items-center gap-2"
                                 >
@@ -211,8 +217,19 @@ const EventScanningUsers = () => {
                                                         <div className="flex items-center gap-2">
                                                             <button
                                                                 onClick={() => {
-                                                                    setDeleteModalOpen(true);
-                                                                    setSelectedEvent(element);
+                                                                    setModalMode("password");
+                                                                    setSelectedUser(element);
+                                                                    setModalOpen(true);
+                                                                }}
+                                                                className="text-2xl cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-200 dark:hover:text-blue-400"
+                                                            >
+                                                                <TbLockPassword />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setModalMode("edit");
+                                                                    setSelectedUser(element);
+                                                                    setModalOpen(true);
                                                                 }}
                                                                 className="text-2xl cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-200 dark:hover:text-blue-400"
                                                             >
@@ -221,7 +238,7 @@ const EventScanningUsers = () => {
                                                             <button
                                                                 onClick={() => {
                                                                     setDeleteModalOpen(true);
-                                                                    setSelectedEvent(element);
+                                                                    setSelectedUser(element);
                                                                 }}
                                                                 className="text-2xl cursor-pointer text-red-600 hover:text-red-800 ml-2"
                                                             >
@@ -247,12 +264,20 @@ const EventScanningUsers = () => {
             )}
 
             <EventScanningUsersFormModal
-                open={addModalOpen}
+                open={modalOpen}
                 onClose={handleAddModalClose}
                 loading={loading}
                 setLoading={setLoading}
                 eventId={eventId}
-                fetchData={fetchData} />
+                fetchData={fetchData}
+                mode={modalMode}
+                editData={selectedUser}
+            />
+
+            <ConfirmModal
+                open={deleteModalOpen}
+                onClose={handleDeleteModalClose}
+                submit={handleDelete} />
         </>
     );
 };

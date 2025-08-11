@@ -1,214 +1,246 @@
-import { useEffect, useRef, useState } from 'react'
-import ModalLayout from '../ModalLayout';
-import TextBox from '../../TextBox';
-import toast from 'react-hot-toast';
-import axiosInstance from '../../../services/axios';
+import { useEffect, useRef, useState } from "react";
+import ModalLayout from "../ModalLayout";
+import TextBox from "../../TextBox";
+import toast from "react-hot-toast";
+import axiosInstance from "../../../services/axios";
 
-const EventScanningUsersFormModal = ({ open, onClose, loading, setLoading, eventId, fetchData = null }) => {
-    const apiKey = import.meta.env["VITE_APP_BASE_URL"];
-    //addcustomer states
-    const [formData, setFormData] = useState({
-        fullName: "",
-        eventId: eventId,
-        password: "",
-        confirmPassword: "",
-    });
+const EventScanningUsersFormModal = ({
+  open,
+  onClose,
+  loading,
+  setLoading,
+  eventId,
+  fetchData = null,
+  mode = "add",
+  editData = null,
+}) => {
+  const apiKey = import.meta.env["VITE_APP_BASE_URL"];
+  //addcustomer states
+  const [formData, setFormData] = useState({
+    fullName: "",
+    eventId: eventId,
+    password: "",
+    confirmPassword: "",
+  });
 
-    const [FormErrors, setFormErrors] = useState({});
-    const [showPassword, setShowPassword] = useState(false); 
-    const nameRef = useRef(null);
-    //end of add customer states
-    useEffect(() => {
-        if (open) {
-            setTimeout(() => {
-                nameRef.current?.focus();
-            }, 50); // small delay ensures DOM is ready
-        } else {
-            setTimeout(() => {
-                setFormData({
-                    fullName: "",
-                    eventId: eventId,
-                    password: "",
-                    confirmPassword: "",
-                });
-            }, 100);
-            setFormErrors({});
-        }
-    }, [open,eventId]);
+  const [FormErrors, setFormErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const nameRef = useRef(null);
+  //end of add customer states
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        nameRef.current?.focus();
+      }, 50);
 
+      if (mode === "edit" && editData) {
+        setFormData({
+          id: editData.id || null,
+          fullName: editData.fullName || "",
+          eventId: eventId,
+          password: "",
+          confirmPassword: "",
+        });
+      } else {
+        setFormData({
+          fullName: "",
+          eventId: eventId,
+          password: "",
+          confirmPassword: "",
+        });
+      }
+    } else {
+      setFormErrors({});
+    }
+  }, [open, eventId, mode, editData]);
 
-    const validateModalInputField = (fieldName, value) => {
-        let message = "";
-        const trimmed = value?.trim();
+  const validateField = (fieldName, value) => {
+    let message = "";
+    const trimmed = value?.trim();
 
-        switch (fieldName) {
-            case "fullName":
-                if (!trimmed) message = "Full Name is required";
-                break;
+    if (
+      (mode === "add" || mode === "edit") &&
+      fieldName === "fullName" &&
+      !trimmed
+    ) {
+      message = "Full Name is required";
+    }
 
-            case "password":
-                if (!trimmed) {
-                    message = "Password is required";
-                } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/.test(trimmed)) {
-                    message = "Password must include upper/lower case, number, special character and be at least 6 characters";
-                }
-                break;
+    if ((mode === "add" || mode === "password") && fieldName === "password") {
+      if (!trimmed) {
+        message = "Password is required";
+      } else if (
+        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/.test(trimmed)
+      ) {
+        message =
+          "Password must include upper/lower case, number, special character and be at least 6 characters";
+      }
+    }
 
-            case "confirmPassword":
-                if (!trimmed) {
-                    message = "Confirm Password is required";
-                } else if (trimmed !== formData.password) {
-                    message = "Passwords do not match";
-                }
-                break;
+    if (
+      (mode === "add" || mode === "password") &&
+      fieldName === "confirmPassword"
+    ) {
+      if (!trimmed) {
+        message = "Confirm Password is required";
+      } else if (trimmed !== formData.password) {
+        message = "Passwords do not match";
+      }
+    }
 
-            default:
-                break;
-        }
+    setFormErrors((prev) => ({ ...prev, [fieldName]: message }));
+  };
 
-        setFormErrors((prev) => ({ ...prev, [fieldName]: message }));
-    };
+  const handleChange = (field) => (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    validateField(field, value);
+  };
 
+  const handleBlur = (field) => (e) => {
+    validateField(field, e.target.value);
+  };
 
-     const handleModalInputChange = (field) => (e) => {
-        const value = e.target.value;
-        setFormData((prev) => ({ ...prev, [field]: value }));
+  const validateForm = () => {
+    const errors = {};
+    let isValid = true;
+    const { fullName, password, confirmPassword } = formData;
 
-        // Validate on change for relevant fields
-        if (["fullName", "password", "confirmPassword"].includes(field)) {
-            validateModalInputField(field, value);
-        }
-    };
+    if (mode === "add" || mode === "edit") {
+      if (!fullName.trim()) {
+        errors.fullName = "Full Name is required";
+        isValid = false;
+      }
+    }
 
-    const handleCustomerModalBlur = (field) => (e) => {
-        validateModalInputField(field, e.target.value);
-    };
+    if (mode === "add" || mode === "password") {
+      if (!password.trim()) {
+        errors.password = "Password is required";
+        isValid = false;
+      } else if (
+        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/.test(password)
+      ) {
+        errors.password =
+          "Password must include upper/lower case, number, special character and be at least 6 characters";
+        isValid = false;
+      }
 
+      if (!confirmPassword.trim()) {
+        errors.confirmPassword = "Confirm Password is required";
+        isValid = false;
+      } else if (confirmPassword !== password) {
+        errors.confirmPassword = "Passwords do not match";
+        isValid = false;
+      }
+    }
 
-    const validateForm = () => {
-        const errors = {};
-        let isValid = true;
-        const { fullName, password, confirmPassword } = formData;
+    setFormErrors(errors);
+    return isValid;
+  };
 
-        if (!fullName.trim()) {
-            errors.fullName = "Full Name is required";
-            isValid = false;
-        }
+  const saveData = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-        if (!password.trim()) {
-            errors.password = "Password is required";
-            isValid = false;
-        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/.test(password)) {
-            errors.password = "Password must include upper/lower case, number, special character and be at least 6 characters";
-            isValid = false;
-        }
+    setLoading(true);
 
-        if (!confirmPassword.trim()) {
-            errors.confirmPassword = "Confirm Password is required";
-            isValid = false;
-        } else if (confirmPassword !== password) {
-            errors.confirmPassword = "Passwords do not match";
-            isValid = false;
-        }
+    let method = "post";
+    let url = `${apiKey}api/ScanningUser/scanning-users`;
 
-        setFormErrors(errors);
-        return isValid;
-    };
+    if (mode === "edit") {
+      method = "put";
+    } else if (mode === "password") {
+      method = "put";
+      url = `${apiKey}api/ScanningUser/scanning-users/${editData?.id}/change-password/`;
+    }
 
-    const saveData = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) {
-            return;
-        }
-        setLoading(true);
-        const method = "post";
-        const url = `${apiKey}api/ScanningUser/scanning-users`;
-        setLoading(true);
-        try {
-            const response = await axiosInstance({
-                method,
-                url,
-                data: formData,
-            });
+    try {
+      const response = await axiosInstance({ method, url, data: formData });
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        if (typeof fetchData === "function") await fetchData();
+        onClose();
+      }
+    } catch (error) {
+    } finally {
+      setTimeout(() => setLoading(false), 500);
+    }
+  };
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                if (typeof fetchData === "function") {
-                    await fetchData();
-                }
-                onClose();
-            }
-        } catch (error) {
-        } finally {
-            setTimeout(() => {
-                setLoading(false);
-            }, 500);
-        }
-    };
+  //end of add customer
 
-    //end of add customer  
+  return (
+    <>
+      {/* add customer modal  */}
+      <ModalLayout open={open} onClose={onClose} submit={saveData} className="">
+        <div className="p-5">
+          <div className="">
+            <h2 className="text-sm inline-block border-b-2 border-gray-400">
+              {mode === "add" && "Add Scanning User"}
+              {mode === "edit" && "Edit Scanning User"}
+              {mode === "password" && "Change Password"}
+            </h2>
+          </div>
+          <div className="mt-5">
+            <div className="grid gap-5 mt-5 flex-grow">
+              {/* Full Name - show in add & edit */}
+              {(mode === "add" || mode === "edit") && (
+                <TextBox
+                  ref={nameRef}
+                  value={formData.fullName}
+                  label="Full Name"
+                  onchange={handleChange("fullName")}
+                  onBlur={handleBlur("fullName")}
+                  error={FormErrors.fullName}
+                />
+              )}
 
-    return (
-        <>
-            {/* add customer modal  */}
-            <ModalLayout
-                open={open}
-                onClose={onClose}
-                submit={saveData}
-                className=''
-            >
-                <div className='p-5'>
-                    <div className="">
-                        <h2 className="text-sm inline-block border-b-2 border-gray-400">
-                            Add Scanning User
-                        </h2>
-                    </div>
-                    <div className='mt-5'>
-                        <div className="grid gap-5 mt-5 flex-grow">
-                            <TextBox
-                                ref={nameRef}
-                                value={formData.fullName}
-                                label="Full Name"
-                                onchange={handleModalInputChange("fullName")}
-                                onBlur={handleCustomerModalBlur("fullName")}
-                                error={FormErrors.fullName}
-                            />
-                            <TextBox
-                                value={formData.password}
-                                label="Password"
-                                onchange={handleModalInputChange("password")}
-                                onBlur={handleCustomerModalBlur("password")}
-                                error={FormErrors.password}
-                                type={showPassword ? "text" : "password"}
-                            />
-                            <TextBox
-                                value={formData.confirmPassword}
-                                label="Confirm Password"
-                                onchange={handleModalInputChange("confirmPassword")}
-                                onBlur={handleCustomerModalBlur("confirmPassword")}
-                                error={FormErrors.confirmPassword}
-                                type={showPassword ? "text" : "password"}
-                            />
-                             <div className="flex items-center space-x-2 mt-1">
-                                <input
-                                    id="show-password"
-                                    type="checkbox"
-                                    checked={showPassword}
-                                    onChange={() => setShowPassword(prev => !prev)}
-                                    className="cursor-pointer"
-                                />
-                                <label htmlFor="show-password" className="cursor-pointer text-sm select-none">
-                                    Show Password
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+              {/* Password - show in add & password */}
+              {(mode === "add" || mode === "password") && (
+                <>
+                  <TextBox
+                    value={formData.password}
+                    label="Password"
+                    onchange={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    error={FormErrors.password}
+                    type={showPassword ? "text" : "password"}
+                  />
 
-                </div>
-            </ModalLayout>
-            {/*end of add customer modal  */}
-        </>
-    )
-}
+                  <TextBox
+                    value={formData.confirmPassword}
+                    label="Confirm Password"
+                    onchange={handleChange("confirmPassword")}
+                    onBlur={handleBlur("confirmPassword")}
+                    error={FormErrors.confirmPassword}
+                    type={showPassword ? "text" : "password"}
+                  />
 
-export default EventScanningUsersFormModal
+                  {/* Show password toggle */}
+                  <div className="flex items-center space-x-2 mt-1">
+                    <input
+                      id="show-password"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={() => setShowPassword((prev) => !prev)}
+                      className="cursor-pointer"
+                    />
+                    <label
+                      htmlFor="show-password"
+                      className="cursor-pointer text-sm select-none"
+                    >
+                      Show Password
+                    </label>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </ModalLayout>
+      {/*end of add customer modal  */}
+    </>
+  );
+};
+
+export default EventScanningUsersFormModal;
