@@ -25,7 +25,6 @@ const initialEventState = {
     eventImages: [],
     latitude: "",
     longitude: "",
-    capacity: "",
     eventCategories: null,
     eventTicketType: [{ name: "", price: "" }],
     removeImageIds: [],
@@ -78,7 +77,6 @@ const EventView = () => {
                     eventImages: data.eventImages || [], // you can show preview images
                     latitude: data.latitude?.toString() || "",
                     longitude: data.longitude?.toString() || "",
-                    capacity: data.capacity?.toString() || "",
                     status: data.status || "",
                     remarks: data.remarks || "",
                     eventCategories: data.eventCategory
@@ -87,6 +85,7 @@ const EventView = () => {
                     eventTicketType: data.eventTicketType.map((t) => ({
                         id: t.id,
                         name: t.name,
+                        capacity: t.capacity,
                         price: t.price.toString(),
                         eventId: t.eventId.toString(),
                     })),
@@ -208,12 +207,6 @@ const EventView = () => {
                                     value={formData.entryCloseTime}
                                     label="Entry Close Time"
                                     type="time"
-                                    readOnly={true}
-                                />
-
-                                <TextBox
-                                    value={formData.capacity}
-                                    label="Capacity"
                                     readOnly={true}
                                 />
                             </div>
@@ -344,6 +337,12 @@ const EventView = () => {
                                                         id={`tickettype_price_${index}`}
                                                         value={option.price}
                                                         label="Price"
+                                                        readonly={true}
+                                                    />
+                                                    <TextBox
+                                                        id={`tickettype_capacity_${index}`}
+                                                        value={option.capacity}
+                                                        label="Capacity"
                                                         readonly={true}
                                                     />
                                                 </div>

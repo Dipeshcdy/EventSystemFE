@@ -28,7 +28,6 @@ const initialEventState = {
   eventImages: [],
   latitude: "",
   longitude: "",
-  capacity: "",
   eventCategories: null,
   eventTicketType: [{ name: "", price: "" }],
   removeImageIds: [],
@@ -74,7 +73,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
         }));
         setCategories(filteredCategories);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
   const fetchEventById = async (id) => {
     try {
@@ -101,13 +100,13 @@ const EventForm = ({ id = null, isViewMode = false }) => {
           eventImages: data.eventImages || [], // you can show preview images
           latitude: data.latitude?.toString() || "",
           longitude: data.longitude?.toString() || "",
-          capacity: data.capacity?.toString() || "",
           eventCategories: data.eventCategory
             ? { value: data.eventCategory.id, label: data.eventCategory.name }
             : null,
           eventTicketType: data.eventTicketType.map((t) => ({
             id: t.id,
             name: t.name,
+            capacity: t.capacity,
             price: t.price.toString(),
             eventId: t.eventId.toString(),
           })),
@@ -165,11 +164,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
           message = `${fieldName.replace(/([A-Z])/g, " $1")} must be a number`;
         break;
 
-      case "capacity":
-        if (!trimmed) message = "Capacity is required";
-        else if (!/^\d+$/.test(trimmed))
-          message = "Capacity must be a positive integer";
-        break;
+
 
       case "eventCategoryId":
         if (!trimmed) message = "Event Category is required";
@@ -221,7 +216,6 @@ const EventForm = ({ id = null, isViewMode = false }) => {
         "entryCloseTime",
         "latitude",
         "longitude",
-        "capacity",
         "eventCategoryId",
         "eventTicketType",
       ].includes(field)
@@ -236,7 +230,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
   const addTicket = () => {
     setFormData((prev) => ({
       ...prev,
-      eventTicketType: [...prev.eventTicketType, { name: "", price: "" }],
+      eventTicketType: [...prev.eventTicketType, { name: "", price: "", capacity: "" }],
     }));
   };
 
@@ -247,7 +241,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
       ...prev,
       eventTicketType: updatedTickets.length
         ? updatedTickets
-        : [{ name: "", price: "" }],
+        : [{ name: "", price: "", capacity: "" }],
     }));
     setFormErrors((prev) => ({
       ...prev,
@@ -310,9 +304,20 @@ const EventForm = ({ id = null, isViewMode = false }) => {
     // Validate "price" using regex
     else if (field === "price") {
       const priceRegex = /^\d+(\.\d{1,2})?$/;
-      if (!priceRegex.test(value)) {
+      if (!value) updatedErrors[index][field] = "Price is required";
+      else if (!priceRegex.test(value)) {
         updatedErrors[index][field] =
           "Enter a valid price (e.g., 100 or 99.99)";
+      } else {
+        updatedErrors[index][field] = "";
+      }
+    }
+    else if (field === "capacity") {
+      const capacityRegex = /^\d+$/;
+      if (!value) updatedErrors[index][field] = "Capacity is required";
+      else if (!capacityRegex.test(value)) {
+        updatedErrors[index][field] =
+          "Capacity must be a positive integer";
       } else {
         updatedErrors[index][field] = "";
       }
@@ -343,7 +348,6 @@ const EventForm = ({ id = null, isViewMode = false }) => {
       "bookingEnd",
       "latitude",
       "longitude",
-      "capacity",
       "image", // required only on create
       "eventCategories",
     ];
@@ -361,9 +365,8 @@ const EventForm = ({ id = null, isViewMode = false }) => {
       if (!value || (typeof value === "string" && !value.trim())) {
         // Converts camelCase to readable field names (e.g., "startDate" => "start Date")
         const readableField = field.replace(/([A-Z])/g, " $1");
-        errors[field] = `${
-          readableField.charAt(0).toUpperCase() + readableField.slice(1)
-        } is required`;
+        errors[field] = `${readableField.charAt(0).toUpperCase() + readableField.slice(1)
+          } is required`;
         isValid = false;
       }
     }
@@ -378,14 +381,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
       isValid = false;
     }
 
-    // Capacity validation (must be numeric and non-negative)
-    if (
-      formData.capacity &&
-      (!/^\d+$/.test(formData.capacity) || Number(formData.capacity) <= 0)
-    ) {
-      errors.capacity = "Capacity must be a positive number";
-      isValid = false;
-    }
+
 
     // Time validation: endTime must be after startTime
     if (formData.startTime && formData.endTime) {
@@ -439,6 +435,15 @@ const EventForm = ({ id = null, isViewMode = false }) => {
           isValid = false;
         }
 
+        // Capacity validation (must be numeric and non-negative)
+        if (
+          ticket.capacity &&
+          (!/^\d+$/.test(ticket.capacity) || Number(ticket.capacity) <= 0)
+        ) {
+          tErrors.capacity = "Capacity must be a positive number";
+          isValid = false;
+        }
+
         ticketErrors[i] = tErrors;
       });
 
@@ -482,7 +487,6 @@ const EventForm = ({ id = null, isViewMode = false }) => {
     // Geo & Capacity
     data.append("Latitude", formData.latitude);
     data.append("Longitude", formData.longitude);
-    data.append("Capacity", formData.capacity);
 
     // ✅ Single Category
     data.append("EventCategoryId", formData.eventCategories.value);
@@ -528,6 +532,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
       }
       data.append(`EventTicketType[${index}].Name`, ticket.name);
       data.append(`EventTicketType[${index}].Price`, ticket.price);
+      data.append(`EventTicketType[${index}].Capacity`, ticket.capacity);
     });
 
     try {
@@ -691,14 +696,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                   readonly={isViewMode}
                 />
 
-                <TextBox
-                  value={formData.capacity}
-                  label="Capacity"
-                  onchange={handleInputChange("capacity")}
-                  onBlur={handleInputBlur("capacity")}
-                  error={formErrors.capacity}
-                  readonly={isViewMode}
-                />
+
               </div>
               <div className="mt-5 grid  gap-5">
                 <div>
@@ -911,6 +909,18 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                             }
                             readonly={isViewMode}
                           />
+
+                          <TextBox
+                            id={`tickettype_capacity_${index}`}
+                            value={option.capacity}
+                            label="Capacity"
+                            onchange={handleTicketInputChange(index,"capacity")}
+                            onBlur={handleTicketInputBlur(index,"capacity")}
+                            error={
+                              formErrors.eventTicketType[index]?.capacity || ""
+                            }
+                            readonly={isViewMode}
+                          />
                         </div>
                       </div>
                     ))}
@@ -920,38 +930,38 @@ const EventForm = ({ id = null, isViewMode = false }) => {
 
               {/* Event Images */}
               <div>
-                  {(formData.eventImages.length > 0 || !isViewMode) && (
-                    <div className="flex justify-between items-center my-5">
-                      <h2 className="text-sm inline-block border-b-2 border-gray-400">
-                        Event Images
-                      </h2>
-                      {!isViewMode && (
-                        <label className="bg-blue-600 text-sm text-white py-1.5 px-4 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all cursor-pointer">
-                          Add Images
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            hidden
-                            onChange={(e) => {
-                              const files = Array.from(e.target.files);
-                              const imagesWithPreview = files.map((file) => ({
-                                file,
-                                preview: URL.createObjectURL(file),
-                              }));
-                              setFormData((prev) => ({
-                                ...prev,
-                                eventImages: [
-                                  ...prev.eventImages,
-                                  ...imagesWithPreview,
-                                ],
-                              }));
-                            }}
-                          />
-                        </label>
-                      )}
-                    </div>
-                  )}
+                {(formData.eventImages.length > 0 || !isViewMode) && (
+                  <div className="flex justify-between items-center my-5">
+                    <h2 className="text-sm inline-block border-b-2 border-gray-400">
+                      Event Images
+                    </h2>
+                    {!isViewMode && (
+                      <label className="bg-blue-600 text-sm text-white py-1.5 px-4 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all cursor-pointer">
+                        Add Images
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          hidden
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files);
+                            const imagesWithPreview = files.map((file) => ({
+                              file,
+                              preview: URL.createObjectURL(file),
+                            }));
+                            setFormData((prev) => ({
+                              ...prev,
+                              eventImages: [
+                                ...prev.eventImages,
+                                ...imagesWithPreview,
+                              ],
+                            }));
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
 
                 {/* Preview Section */}
                 {formData.eventImages.length > 0 && (
