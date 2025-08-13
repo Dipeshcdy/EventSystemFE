@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import EventCard from "../../components/Event/EventCard";
 import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../services/axios";
+import Pagination from "../../components/Pagination";
 const pageSize = 10;
 const Events = ({ status }) => {
   const { setLoading } = useAuth();
@@ -110,6 +111,18 @@ const Events = ({ status }) => {
           ))}
         </div>
       </section>
+
+      <div className="mt-4 px-20">
+        {events.length > 0 && (
+          <Pagination
+            totalRecords={pagination.totalRecords}
+            currentPage={pagination.currentPage}
+            pageSize={pagination.pageSize}
+            totalPages={pagination.totalPages}
+            onPaginationChange={onPaginationChange}
+          />
+        )}
+      </div>
     </>
   );
 };

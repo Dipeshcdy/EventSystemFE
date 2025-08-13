@@ -286,7 +286,7 @@ const EventView = () => {
                 Navigate
               </button>
             </div>
-            <div className="w-full h-[50vh] mt-4 ">
+            <div className="w-full h-[80vh] mt-4 ">
               <iframe
                 width="100%"
                 height="100%"
