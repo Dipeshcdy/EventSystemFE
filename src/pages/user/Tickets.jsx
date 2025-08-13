@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axiosInstance from "../../services/axios";
 import { useAuth } from "../../context/AuthContext";
 import TicketCard from "../../components/Event/TicketCard";
-const pageSize = 10;
+import Pagination from "../../components/Pagination";
+import { CiSearch, CiEdit } from "react-icons/ci";
+const pageSize = 5;
 const Tickets = () => {
     const apiKey = import.meta.env["VITE_APP_BASE_URL"];
     const [search, setSearch] = useState("");
@@ -16,6 +18,7 @@ const Tickets = () => {
         totalPages: null,
         totalRecords: null,
     });
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -36,6 +39,17 @@ const Tickets = () => {
         };
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+        } else {
+            const delayDebounceFn = setTimeout(() => {
+                fetchData();
+            }, 1000);
+            return () => clearTimeout(delayDebounceFn);
+        }
+    }, [search]);
 
     const handlePaymentCallBack = async () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -147,13 +161,33 @@ const Tickets = () => {
                 </div>
             </div>
             <section className="px-20 pt-20">
-                <div className="mb-4 flex justify-end">
-                    <button
-                        onClick={printSelectedTickets}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                        Print Selected Tickets
-                    </button>
+                <div className="mt-5 flex flex-wrap gap-5 justify-between items-center ">
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="relative w-56">
+                            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <CiSearch className="text-gray-800 dark:text-white" />
+                            </div>
+                            <input
+                                type="text"
+                                id="simple-search"
+                                className="bg-white border border-gray-300 placeholder:text-xs text-xs text-gray-900 rounded-3xl  block w-full ps-10 px-2.5 py-2 outline-none dark:bg-black dark:text-white"
+                                placeholder="Search..."
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <button
+                            onClick={printSelectedTickets}
+                            className="bg-blue-600 text-sm text-white py-1.5 px-9 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all flex items-center gap-2"
+                        >
+                            Print Selected Tickets
+                        </button>
+                    </div>
                 </div>
                 <div className="grid  gap-10">
                     {tickets.map((element, index) => (
@@ -176,6 +210,18 @@ const Tickets = () => {
                                 </div>
                             </>
                         ))}
+                </div>
+
+                <div className="mt-4">
+                    {tickets.length > 0 && (
+                        <Pagination
+                            totalRecords={pagination.totalRecords}
+                            currentPage={pagination.currentPage}
+                            pageSize={pagination.pageSize}
+                            totalPages={pagination.totalPages}
+                            onPaginationChange={onPaginationChange}
+                        />
+                    )}
                 </div>
             </section>
         </>

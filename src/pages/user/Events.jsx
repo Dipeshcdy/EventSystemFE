@@ -3,10 +3,10 @@ import EventCard from "../../components/Event/EventCard";
 import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../services/axios";
 const pageSize = 10;
-const Events = () => {
+const Events = ({ status }) => {
   const { setLoading } = useAuth();
+  const todayISO = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
   const [pageLoading, setPageLoading] = useState(true);
-
   const apiKey = import.meta.env["VITE_APP_BASE_URL"];
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState({
@@ -54,6 +54,11 @@ const Events = () => {
     if (search) {
       params.append("search", search);
     }
+    if (status == "upcoming") {
+      params.append("startDate", todayISO); // <== Add this line
+    } else if (status == "past") {
+      params.append("endDate", todayISO); // <== Add this line
+    }
 
     params.append("status", "Accepted"); // <== Add this line
     params.append("pageNumber", currentPage);
@@ -75,7 +80,7 @@ const Events = () => {
           totalRecords: data.totalRecords,
         });
       }
-    } catch (error) {}
+    } catch (error) { }
   };
   //fetch category
 
@@ -94,7 +99,7 @@ const Events = () => {
       >
         <div className="absolute inset-0 bg-black bg-opacity-70 text-white flex items-center sm:px-10 px-6">
           <div className="2xl:max-w-[1650px] xl:max-w-[1250px] w-full mx-auto">
-            <h1 className="md:text-3xl sm:text-2xl text-xl">Events</h1>
+            <h1 className="md:text-3xl sm:text-2xl text-xl"><span className="capitalize">{status} </span>Events</h1>
           </div>
         </div>
       </div>

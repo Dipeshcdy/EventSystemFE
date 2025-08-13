@@ -96,7 +96,7 @@ const EventList = ({ status }) => {
           totalRecords: data.totalRecords,
         });
       }
-    } catch (error) {}
+    } catch (error) { }
   };
   //fetch category
 

@@ -22,8 +22,9 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import Masonry from "@mui/lab/Masonry";
 import Fancybox from "../../components/User/FancyBox";
-import formatNepaliCurrency from "../../utils/utils";
+import formatNepaliCurrency, { isBookingOpen, isOngoingEvent, isPastEvent } from "../../utils/utils";
 import TicketSelector from "../../components/User/Event/TicketSelector";
+import EventRatings from "../../components/User/Event/EventRatings";
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -61,16 +62,6 @@ const EventView = () => {
   const [event, setEvent] = useState(null);
   const [tab, setTab] = useState(0);
 
-  const [quantities, setQuantities] = useState(null);
-
-  const updateQuantity = (index, newValue) => {
-    if (newValue >= 0) {
-      setQuantities((prev) =>
-        prev.map((qty, i) => (i === index ? newValue : qty))
-      );
-    }
-  };
-
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -98,7 +89,6 @@ const EventView = () => {
       if (response.status === 200) {
         const data = response.data.data;
         setEvent(data);
-        setQuantities(data.eventTicketType?.map(() => 0) || []);
       }
     } catch (err) {
       console.error(err);
@@ -129,7 +119,7 @@ const EventView = () => {
             </div>
           </div>
           <section className="px-20 pt-20 grid grid-cols-3 gap-8">
-            <div className="col-span-2 space-y-4">
+            <div className={`${isBookingOpen(event.bookingStart, event.bookingEnd) ? "col-span-2" : "col-span-3"} space-y-4`}>
               <div>
                 <img src={`${apiKey + event.imageUrl}`} alt="" />
               </div>
@@ -151,8 +141,8 @@ const EventView = () => {
                     {event.startDate === event.endDate
                       ? formatDate(event.startDate)
                       : `${formatDate(event.startDate)} - ${formatDate(
-                          event.endDate
-                        )}`}
+                        event.endDate
+                      )}`}
                   </h2>
                 </div>
 
@@ -162,8 +152,8 @@ const EventView = () => {
                     {event.startTime === event.endTime
                       ? formatTime(event.startTime)
                       : `${formatTime(event.startTime)} - ${formatTime(
-                          event.endTime
-                        )}`}
+                        event.endTime
+                      )}`}
                   </h2>
                 </div>
 
@@ -196,12 +186,6 @@ const EventView = () => {
                   <h2 className="text-sm">
                     Category: {event.eventCategory?.name}
                   </h2>
-                </div>
-
-                {/* Capacity */}
-                <div className="flex gap-2">
-                  <IoPeopleOutline />
-                  <h2 className="text-sm">Capacity: {event.capacity}</h2>
                 </div>
 
                 <div>
@@ -282,11 +266,42 @@ const EventView = () => {
                 </div>
               </div>
             </div>
+            {isBookingOpen(event.bookingStart, event.bookingEnd) && (
+              <div>
+                <TicketSelector event={event} />
+              </div>
+            )}
 
-            <div>
-              <TicketSelector event={event} />
+          </section>
+          <section className="p-20">
+            <div className="flex justify-end">
+              <button
+                className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-all"
+                onClick={() => {
+                  const destination = `${event.latitude},${event.longitude}`;
+                  const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+                  window.open(url, "_blank");
+                }}
+              >
+                Navigate
+              </button>
+            </div>
+            <div className="w-full h-[50vh] mt-4 ">
+              <iframe
+                width="100%"
+                height="100%"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps?q=${event.latitude},${event.longitude}&hl=es;z=15&output=embed`}
+              ></iframe>
             </div>
           </section>
+          {(isPastEvent(event.endDate) || isOngoingEvent(event.startDate, event.endDate)) && (
+            <section className="px-20">
+              <EventRatings eventId={id} />
+            </section>
+          )}
         </>
       )}
     </>

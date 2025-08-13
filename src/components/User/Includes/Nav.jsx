@@ -56,7 +56,10 @@ const Nav = () => {
           <ul className="flex items-center gap-10 text-white text-lg font-semibold font-sans">
             <li><Link to="/">Home</Link></li>
             <li>
-              <Link to="/events">Events</Link>
+              <Link to="/upcoming-events">Upcoming Events</Link>
+            </li>
+            <li>
+              <Link to="/past-events">Past Events</Link>
             </li>
             <li>
               <Link to="/mytickets">Tickets</Link>

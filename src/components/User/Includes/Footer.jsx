@@ -1,8 +1,12 @@
 import React from "react";
 import logo from "../../../images/logo2.png";
+import { useAuth } from "../../../context/AuthContext";
 
 const Footer = () => {
+  const {loading}=useAuth();
   return (
+    <>
+    {!loading && (
     <>
       {/* footer section */}
       <div className="relative mt-16 bg-[#227ec0]">
@@ -86,6 +90,8 @@ const Footer = () => {
         </div>
       </div>
       {/* end of footer section */}
+    </>
+    )}
     </>
   );
 };
