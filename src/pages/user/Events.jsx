@@ -3,6 +3,7 @@ import EventCard from "../../components/Event/EventCard";
 import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../services/axios";
 import Pagination from "../../components/Pagination";
+import { EventTimeStatus } from "../../constants/constants";
 const pageSize = 10;
 const Events = ({ status }) => {
   const { setLoading } = useAuth();
@@ -55,10 +56,13 @@ const Events = ({ status }) => {
     if (search) {
       params.append("search", search);
     }
-    if (status == "upcoming") {
-      params.append("startDate", todayISO); // <== Add this line
-    } else if (status == "past") {
-      params.append("endDate", todayISO); // <== Add this line
+    // Use enum-based filtering
+    if (status === EventTimeStatus.Upcoming) {
+      params.append("eventTimeStatus", EventTimeStatus.Upcoming);
+    } else if (status === EventTimeStatus.Past) {
+      params.append("eventTimeStatus", EventTimeStatus.Past);
+    } else if (status === EventTimeStatus.Ongoing) {
+      params.append("eventTimeStatus", EventTimeStatus.Ongoing);
     }
 
     params.append("status", "Accepted"); // <== Add this line
@@ -105,11 +109,16 @@ const Events = ({ status }) => {
         </div>
       </div>
       <section className="px-20 pt-20">
-        <div className="grid grid-cols-3 gap-8">
-          {events.map((element, index) => (
-            <EventCard element={element} />
-          ))}
-        </div>
+        {events.length > 0 ? (<>
+          <div className="grid grid-cols-3 gap-8">
+            {events.map((element, index) => (
+              <EventCard element={element} />
+            ))}
+          </div>
+        </>) : (<>
+          <p className="text-red-500 text-xl">No Data Found !</p>
+        </>)}
+
       </section>
 
       <div className="mt-4 px-20">

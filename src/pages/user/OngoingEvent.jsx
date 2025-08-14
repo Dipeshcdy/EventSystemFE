@@ -1,10 +1,10 @@
 import { EventTimeStatus } from '../../constants/constants'
 import Events from './Events'
 
-const UpcomingEvents = () => {
+const OngoingEvent = () => {
   return (
-    <Events status={EventTimeStatus.Upcoming} />
+    <Events status={EventTimeStatus.Ongoing} />
   )
 }
 
-export default UpcomingEvents
+export default OngoingEvent

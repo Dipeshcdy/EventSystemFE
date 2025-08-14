@@ -6,11 +6,13 @@ import UpcomingEvents from "../pages/user/UpcomingEvents";
 import PastEvents from "../pages/user/PastEvents";
 import EventsNear from "../pages/user/EventsNear";
 import EventsRecommend from "../pages/user/EventsRecommend";
+import OngoingEvent from "../pages/user/OngoingEvent";
 
 const UserRoutes = () => (
     <>
          <Route path="/upcoming-events" element={<UpcomingEvents />} />
          <Route path="/past-events" element={<PastEvents />} />
+         <Route path="/ongoing-events" element={<OngoingEvent />} />
          <Route path="/events-near-you" element={<EventsNear />} />
          <Route path="/recommended-events" element={<EventsRecommend />} />
          <Route path="/myTickets" element={<Tickets />} />

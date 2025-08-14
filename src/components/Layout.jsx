@@ -39,7 +39,7 @@ const Layout = () => {
           </div>
         </div>
       </div>
-      <ChatbotWidget />
+      {/* <ChatbotWidget /> */}
     </>
   );
 };

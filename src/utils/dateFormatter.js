@@ -18,6 +18,29 @@ export function formatDateToLocal(dateString, options = {}) {
   }
 }
 
+export function formatUtcDate(dateString) {
+  if (!dateString) return "";
+  
+  const utcDate = dateString.endsWith("Z") ? dateString : dateString + "Z";
+  const dateObj = new Date(utcDate);
+
+  const datePart = dateObj.toLocaleDateString(undefined, {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+
+  const timePart = dateObj.toLocaleTimeString(undefined, {
+    hour12: true,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  return `${datePart} ${timePart}`;
+}
+
 
 
 export function formatDate(date) {

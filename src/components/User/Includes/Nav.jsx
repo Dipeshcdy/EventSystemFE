@@ -109,6 +109,9 @@ const Nav = () => {
                   <Link to="/upcoming-events">Upcoming Events</Link>
                 </li>
                 <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
+                  <Link to="/ongoing-events">Ongoing Events</Link>
+                </li>
+                <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
                   <Link to="/past-events">Past Events</Link>
                 </li>
                 <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
@@ -124,7 +127,6 @@ const Nav = () => {
             <li>
               <Link to="/mytickets">Tickets</Link>
             </li>
-            <li>Contact</li>
           </ul>
         </div>
         <div className="hidden gap-5 md:flex">
@@ -168,9 +170,37 @@ const Nav = () => {
       >
         <div className="block">
           <ul className="flex flex-col  gap-2 text-white text-lg font-semibold font-sans">
-            <li>Home</li>
-            <li>About Us</li>
-            <li>Contact</li>
+            <li><Link to="/">Home</Link></li>
+            {/* Events Dropdown */}
+            <li className="group 2xl:text-lg p-2 rounded relative list-none">
+              <p className="flex items-center text-white cursor-pointer">
+                <span>Events</span>
+                <MdArrowDropDown className="text-2xl" />
+              </p>
+
+              <ul className="absolute top-10 text-black cursor-pointer border bg-white w-56 pb-2 z-[999] hidden group-hover:block">
+                <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
+                  <Link to="/upcoming-events">Upcoming Events</Link>
+                </li>
+                <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
+                  <Link to="/ongoing-events">Ongoing Events</Link>
+                </li>
+                <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
+                  <Link to="/past-events">Past Events</Link>
+                </li>
+                <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
+                  <Link to="/events-near-you">Events Near You</Link>
+                </li>
+                <li className="pl-4 hover:bg-gray-100 hover:text-primary py-2 mt-2">
+                  <Link to="/recommended-events">Events You May Like</Link>
+                </li>
+              </ul>
+
+              <div className="absolute h-[3px] w-[0%] group-hover:w-[100%] bg-primary duration-500"></div>
+            </li>
+            <li>
+              <Link to="/mytickets">Tickets</Link>
+            </li>
           </ul>
         </div>
         <div className="flex gap-5 mt-5">

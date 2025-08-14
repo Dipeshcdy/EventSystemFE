@@ -5,6 +5,12 @@ export const Roles = {
   User: "User", // if used
 };
 
+export const EventTimeStatus = Object.freeze({
+  Upcoming: "Upcoming",
+  Past: "Past",
+  Ongoing: "Ongoing",
+});
+
 // === Claim Types from JWT (matches .NET claim types) ===
 export const Claims = {
   Role: "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
