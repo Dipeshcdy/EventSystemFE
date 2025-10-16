@@ -1,15 +1,11 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import demoimg from "../images/dummy-image.jpg";
-import { IoIosArrowDown } from "react-icons/io";
 import { FaBars } from "react-icons/fa";
-import { IoIosNotificationsOutline } from "react-icons/io";
-import { CiSearch } from "react-icons/ci";
 import { ToggleTheme } from "./ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import ProgressBar from "../common/ProgressBar";
-import { HiBars3 } from "react-icons/hi2";
 import { TfiAngleDoubleLeft } from "react-icons/tfi";
 import { TfiAngleDoubleRight } from "react-icons/tfi";
 const TopBar = ({ isSidebarOpenInLg, toggleSidebarInLg, toggleSidebar, title, loading = false }) => {
@@ -75,7 +71,7 @@ const TopBar = ({ isSidebarOpenInLg, toggleSidebarInLg, toggleSidebar, title, lo
             <div className="mr-2">
               {/* <IoIosNotificationsOutline className="text-2xl cursor-pointer dark:text-white" /> */}
             </div>
-            <div className="w-[40px] h-[40px]">
+            {/* <div className="w-[40px] h-[40px]">
               <img
                 src={demoimg}
                 className="w-full  rounded-full h-full overflow-hidden object-cover object-center cursor-pointer"
@@ -83,7 +79,6 @@ const TopBar = ({ isSidebarOpenInLg, toggleSidebarInLg, toggleSidebar, title, lo
                 onClick={toggleModal}
               />
             </div>
-            {/* modal */}
             <div
               ref={modalRef}
               className={`absolute  top-[110%] right-0 bg-white text-sm text-gray-700 w-48 py-2 z-50 border border-gray-300 rounded-md transition-all duration-300 dark:bg-black dark:text-white ${isOpen ? "scale-100 opacity-100" : "scale-0 opacity-0"
@@ -98,7 +93,7 @@ const TopBar = ({ isSidebarOpenInLg, toggleSidebarInLg, toggleSidebar, title, lo
               <h2 onClick={handleLogout} className="px-3 py-1 hover:bg-blue-100 hover:text-blue-600 cursor-pointer dark:hover:bg-blue-600 dark:hover:text-white">
                 Logout
               </h2>
-            </div>
+            </div> */}
             {/*end of modal */}
           </div>
         </div>

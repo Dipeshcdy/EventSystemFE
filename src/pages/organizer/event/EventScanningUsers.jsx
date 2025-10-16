@@ -152,7 +152,7 @@ const EventScanningUsers = () => {
                                     }}
                                     className="bg-blue-600 text-sm text-white py-1.5 px-9 rounded-xl border border-blue-600 hover:bg-blue-700 duration-500 transition-all flex items-center gap-2"
                                 >
-                                    Add new Item <FaSquarePlus className="text-xl" />
+                                    Add new User <FaSquarePlus className="text-xl" />
                                 </button>
                             </div>
                         </div>

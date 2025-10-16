@@ -42,13 +42,11 @@ function Sidebar({
     <>
       <aside
         id="default-sidebar"
-        className={`fixed  top-0 lg:left-0  ${
-          isSidebarOpen ? "left-0" : "-left-full"
-        } ${
-          isSidebarOpenInLg
+        className={`fixed  top-0 lg:left-0  ${isSidebarOpen ? "left-0" : "-left-full"
+          } ${isSidebarOpenInLg
             ? "translate-x-0 opacity-100"
             : "-translate-x-full opacity-0"
-        } lg:w-[18rem]  w-[70%] h-screen bg-white dark:bg-black transition-all lg:duration-700 lg:ease-in-out duration-500  ease-linear z-[999] `}
+          } lg:w-[18rem]  w-[70%] h-screen bg-white dark:bg-black transition-all lg:duration-700 lg:ease-in-out duration-500  ease-linear z-[999] `}
         aria-label="Sidebar"
       >
         <div className=" flex flex-col h-full px-3 py-4 pt-1">
@@ -96,6 +94,17 @@ function Sidebar({
                       toggleSubmenu={toggleSubmenu}
                     />
                   </li>
+
+                  <li>
+                    <SidebarButton
+                      page="report"
+                      activePage={active}
+                      route="/admin/report"
+                    >
+                      <RxDashboard className="text-lg" />
+                      <span className="ms-3">Report</span>
+                    </SidebarButton>
+                  </li>
                 </>
               )}
 
@@ -118,6 +127,16 @@ function Sidebar({
                       openMenu={openMenu}
                       toggleSubmenu={toggleSubmenu}
                     />
+                  </li>
+                  <li>
+                    <SidebarButton
+                      page="report"
+                      activePage={active}
+                      route="/organizer/report"
+                    >
+                      <RxDashboard className="text-lg" />
+                      <span className="ms-3">Report</span>
+                    </SidebarButton>
                   </li>
                 </>
               )}
