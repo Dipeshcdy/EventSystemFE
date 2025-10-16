@@ -222,7 +222,6 @@ const Dashboard = () => {
         setUpcomingEvents(data.upcomingAcceptedEvents);
         setRecentSignUps(data.recentUserSignups);
         setRecentReview(data.recentEventFeedbacks);
-        // setTopEvents(Array.isArray(data.topSellingItems) ? data.topSellingItems : []);
 
         setDashboardSummary({
           totalPendingEvents: data.totalPendingEvents,
@@ -284,7 +283,7 @@ const Dashboard = () => {
                     Total Revenue
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {formatNepaliCurrency(dashboardSummary.totalRevenue)}
+                    {formatNepaliCurrency(dashboardSummary?.totalRevenue ?? "")}
                   </h2>
                 </div>
 
@@ -295,7 +294,7 @@ const Dashboard = () => {
                     Total Tickets Sold
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {dashboardSummary.totalTicketsSold}
+                    {dashboardSummary?.totalTicketsSold}
                   </h2>
                 </div>
 
@@ -306,7 +305,7 @@ const Dashboard = () => {
                     Total Organizers
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {dashboardSummary.totalOrganizers}
+                    {dashboardSummary?.totalOrganizers}
                   </h2>
                 </div>
 
@@ -317,7 +316,7 @@ const Dashboard = () => {
                     Total Users
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {dashboardSummary.totalUsers}
+                    {dashboardSummary?.totalUsers}
                   </h2>
                 </div>
 
@@ -328,7 +327,7 @@ const Dashboard = () => {
                     Total Pending Events
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {dashboardSummary.totalPendingEvents}
+                    {dashboardSummary?.totalPendingEvents}
                   </h2>
                 </div>
 
@@ -339,7 +338,7 @@ const Dashboard = () => {
                     Total Accepted Events
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {dashboardSummary.totalAcceptedEvents}
+                    {dashboardSummary?.totalAcceptedEvents}
                   </h2>
                 </div>
 
@@ -350,7 +349,7 @@ const Dashboard = () => {
                     Total Rejected Events
                   </h2>
                   <h2 className="sm:text-2xl text-base font-bold">
-                    {dashboardSummary.totalRejectedEvents}
+                    {dashboardSummary?.totalRejectedEvents}
                   </h2>
                 </div>
 
@@ -519,7 +518,7 @@ const Dashboard = () => {
                       {recentReview?.map((element, index) => (
                         <tr key={index} className="border-b border-gray-300">
                           <td className="text-xs sm:text-sm px-2 py-3">
-                            <img src={apiKey+element.profileImageUrl} className="w-10 h-10 object-cover object-center" alt="" />
+                            <img src={apiKey + element.profileImageUrl} className="w-10 h-10 object-cover object-center" alt="" />
                           </td>
                           <td className="text-xs sm:text-sm px-2 py-3">{element.fullName}</td>
                           <td className="text-xs sm:text-sm px-2 py-3">{element.eventName}</td>
