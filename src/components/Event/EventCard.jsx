@@ -15,7 +15,9 @@ const EventCard = ({ element }) => {
     <>
       <div class="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-lg">
         <div class="relative overflow-hidden text-white shadow-lg bg-blue-gray-500 bg-clip-border shadow-blue-gray-500/40">
-          <img src={`${apiKey + element.imageUrl}`} alt="ui/ux review check" />
+          <div className="w-full h-[200px]">
+            <img src={`${apiKey + element.imageUrl}`} className="w-full h-full object-cover object-center" alt="ui/ux review check" />
+          </div>
           <div class="absolute inset-0 w-full h-full to-bg-black-10 bg-gradient-to-tr from-transparent via-transparent to-black/60"></div>
           <button
             class="!absolute top-4 right-4 h-8 max-h-[32px] w-8 max-w-[32px] select-none rounded-full text-center align-middle font-sans text-xs font-medium uppercase text-red-500 transition-all hover:bg-red-500/10 active:bg-red-500/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
