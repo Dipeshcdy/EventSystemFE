@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import bg from "../images/1.png"
+import bg from "../images/event.png"
 import { FaHotel, FaTicketAlt } from "react-icons/fa";
 import { IoCalendarOutline, IoRestaurant } from "react-icons/io5";
 
-import appImage from "../images/appimage.jpeg";
+import appImage from "../images/event.png";
 import { MdMailOutline } from "react-icons/md";
 import { Link } from 'react-router-dom';
 import Loader from '../common/Loader';
