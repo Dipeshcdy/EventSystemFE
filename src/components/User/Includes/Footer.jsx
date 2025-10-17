@@ -64,22 +64,7 @@ const Footer = () => {
                   © {new Date().getFullYear()} EventTicketing Inc. All rights reserved.
                 </p>
                 <div className="flex items-center mt-4 space-x-4 sm:mt-0">
-                  <a href="/" className="hover:text-blue-400 transition-colors duration-300 text-deep-purple-100">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5">
-                      <path d="M24,4.6c-0.9,0.4-1.8,0.7-2.8,0.8..." />
-                    </svg>
-                  </a>
-                  <a href="/" className="hover:text-pink-400 transition-colors duration-300 text-deep-purple-100">
-                    <svg viewBox="0 0 30 30" fill="currentColor" className="h-6">
-                      <circle cx="15" cy="15" r="4" />
-                      <path d="M19.999,3h-10C6.14,3,3,6.141,3..." />
-                    </svg>
-                  </a>
-                  <a href="/" className="hover:text-blue-400 transition-colors duration-300 text-deep-purple-100">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5">
-                      <path d="M22,0H2C0.895,0,0,0.895,0..." />
-                    </svg>
-                  </a>
+                  Powered By :- Dipesh Chaudhary
                 </div>
               </div>
             </div>
