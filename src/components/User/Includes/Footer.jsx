@@ -26,7 +26,7 @@ const Footer = () => {
             <div className="md:w-1/3">
               <a href="/" aria-label="Go home" title="Event Ticketing" className="flex items-center">
                 <div className="h-10 w-10">
-                  <img src={logo} className="h-full w-full object-cover object-center" alt="Logo" />
+                  <img src={logo} className="h-full w-full rounded-full object-cover object-center" alt="Logo" />
                 </div>
                 <span className="ml-2 mt-auto text-lg font-bold tracking-wide text-gray-100 uppercase">
                   Event Ticketing System

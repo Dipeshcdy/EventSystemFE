@@ -89,7 +89,7 @@ const Nav = () => {
         <div className="w-10 h-10">
           <img
             src={logo}
-            className="w-full h-full object-center object-cover"
+            className="w-full h-full object-center object-cover rounded-full"
             alt=""
           />
         </div>
