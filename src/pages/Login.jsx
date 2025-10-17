@@ -45,9 +45,9 @@ const Login = () => {
       );
       if (response.status === 200) {
         setAccessToken(response.data.data.token);
-       setTimeout(() => {
-         handleRedirect();
-       }, 100);
+        setTimeout(() => {
+          handleRedirect();
+        }, 100);
       }
     } catch (error) {
       console.log(error);
@@ -69,7 +69,6 @@ const Login = () => {
         `${apiKey}api/Authentication/forgot-password`,
         {
           email: email,
-          returnUrl: `${returnUrl}reset-password`,
         }
       );
       if (response.status === 200) {

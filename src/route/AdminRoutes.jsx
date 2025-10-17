@@ -10,11 +10,13 @@ import AcceptedEvent from "../pages/admin/Event/AcceptedEvent";
 import RejectedEvent from "../pages/admin/Event/RejectedEvent";
 import EventView from "../pages/admin/Event/EventView";
 import ReportList from "../pages/admin/Report/ReportList";
+import TicketScanLogs from "../pages/admin/TicketLogs/TicketScanLogs";
 
 const AdminRoutes = () => (
   <Routes>
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="report" element={<ReportList />} />
+    <Route path="ticket-logs" element={<TicketScanLogs />} />
     <Route path="eventcategory" element={<EventCategory />} />
     <Route path="event/pending" element={<PendingEvents />} />
     <Route path="event/accepted" element={<AcceptedEvent />} />

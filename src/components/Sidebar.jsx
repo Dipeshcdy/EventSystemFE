@@ -105,6 +105,16 @@ function Sidebar({
                       <span className="ms-3">Report</span>
                     </SidebarButton>
                   </li>
+                  <li>
+                    <SidebarButton
+                      page="ticket-logs"
+                      activePage={active}
+                      route="/admin/ticket-logs"
+                    >
+                      <RxDashboard className="text-lg" />
+                      <span className="ms-3">Ticket Scan Logs</span>
+                    </SidebarButton>
+                  </li>
                 </>
               )}
 
