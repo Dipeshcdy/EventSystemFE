@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
-import logo from "../../../images/logo2.png";
+import logo from "../../../images/logo3.jpeg";
 import { useAuth } from "../../../context/AuthContext";
 import toast from "react-hot-toast";
 import ProgressBar from "../../../common/ProgressBar";

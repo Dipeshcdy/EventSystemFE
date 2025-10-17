@@ -3,8 +3,8 @@ import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import Loader from "../common/Loader";
 
-import bg from "../images/1.png";
-import designerImage from "../images/Designer.png";
+import bg from "../images/event.png";
+import designerImage from "../images/event.png";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
 import axiosInstance from "../services/axios";

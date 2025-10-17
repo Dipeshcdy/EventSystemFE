@@ -8,11 +8,13 @@ import ViewEvent from "../pages/organizer/event/ViewEvent";
 import EditEvent from "../pages/organizer/event/EditEvent";
 import EventScanningUsers from "../pages/organizer/event/EventScanningUsers";
 import ReportList from "../pages/organizer/Report/ReportList";
+import TicketScanLogs from "../pages/organizer/TicketLogs/TicketScanLogs";
 
 const OrganizerRoutes = () => (
   <Routes>
     <Route path="dashboard" element={<Dashboard />} />
     <Route path="report" element={<ReportList />} />
+    <Route path="ticket-logs" element={<TicketScanLogs />} />
     <Route path="event/create" element={<CreateEvent />} />
     <Route path="event/:id" element={<EditEvent />} />
     <Route path="event/:id/view" element={<ViewEvent />} />

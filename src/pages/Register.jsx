@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../common/Loader";
 //import { handleRedirect, getToken } from "../utils/jwtUtils";
-import bg from "../images/1.png"
+import bg from "../images/event.png"
 import designerImage from "../images/Designer.png"
 import login from "../images/login.webp"
 import { RiLockPasswordLine } from "react-icons/ri";

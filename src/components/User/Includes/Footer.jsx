@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../../../images/logo2.png";
+import logo from "../../../images/logo3.jpeg";
 import { useAuth } from "../../../context/AuthContext";
 
 const Footer = () => {
