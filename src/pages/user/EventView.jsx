@@ -203,12 +203,12 @@ const EventView = () => {
                         />
                         <Tab
                           className="!normal-case"
-                          label="Terms and Conditions"
+                          label="Description"
                           {...a11yProps(1)}
                         />
                         <Tab
                           className="!normal-case"
-                          label="Description"
+                          label="Terms and Conditions"
                           {...a11yProps(1)}
                         />
                       </Tabs>
