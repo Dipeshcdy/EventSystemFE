@@ -19,7 +19,6 @@ const TABLE_HEAD = [
     { head: "Venue" },
     { head: "Start Date" },
     { head: "End Date" },
-    { head: "Capacity" },
     { head: "Organizer" },
     { head: "Actions" },
 ];
@@ -272,14 +271,7 @@ const EventList = ({status}) => {
                                                             {element.endDate}
                                                         </Typography>
                                                     </td>
-                                                    <td className={classes}>
-                                                        <Typography
-                                                            variant="small"
-                                                            className="font-normal text-gray-600 dark:text-white"
-                                                        >
-                                                            {element.capacity}
-                                                        </Typography>
-                                                    </td>
+                                                    
                                                     <td className={classes}>
                                                         <Typography
                                                             variant="small"
