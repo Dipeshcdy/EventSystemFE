@@ -177,6 +177,28 @@ const EventForm = ({ id = null, isViewMode = false }) => {
         break;
     }
 
+    // ✅ Additional rule for entryCloseTime
+    if (fieldName === "entryCloseTime" && !message) {
+      const start = formValues.startTime?.trim();
+      const end = formValues.endTime?.trim();
+
+      if (start && /^\d{2}:\d{2}$/.test(start) && /^\d{2}:\d{2}$/.test(trimmed)) {
+        const [sh, sm] = start.split(":").map(Number);
+        const [eh, em] = (end || "23:59").split(":").map(Number);
+        const [ch, cm] = trimmed.split(":").map(Number);
+
+        const startMinutes = sh * 60 + sm;
+        const endMinutes = eh * 60 + em;
+        const closeMinutes = ch * 60 + cm;
+
+        if (closeMinutes < startMinutes)
+          message = "Entry close time cannot be before start time";
+        else if (closeMinutes > endMinutes)
+          message = "Entry close time cannot be after end time";
+      }
+    }
+
+
     setFormErrors((prev) => ({ ...prev, [fieldName]: message }));
   };
 
@@ -333,6 +355,17 @@ const EventForm = ({ id = null, isViewMode = false }) => {
     const errors = {};
     let isValid = true;
 
+    // ---- small helpers
+    const toMinutes = (hhmm) => {
+      const m = /^(\d{2}):(\d{2})$/.exec((hhmm || "").trim());
+      if (!m) return null;
+      const h = Number(m[1]), min = Number(m[2]);
+      if (h > 23 || min > 59) return null;
+      return h * 60 + min;
+    };
+    const toDate = (yyyyMMdd) => (yyyyMMdd ? new Date(yyyyMMdd) : null);
+
+
     const requiredFieldsCreate = [
       "termsAndConditions",
       "title",
@@ -390,6 +423,27 @@ const EventForm = ({ id = null, isViewMode = false }) => {
       if (start >= end) {
         errors.endTime = "End Time must be after Start Time";
         isValid = false;
+      }
+    }
+
+    // ✅ NEW: entryCloseTime must be >= startTime and <= endTime
+    if (formData.entryCloseTime) {
+      const closeMin = toMinutes(formData.entryCloseTime);
+      const startMin = formData.startTime ? toMinutes(formData.startTime) : null;
+      const endMin = formData.endTime ? toMinutes(formData.endTime) : null;
+
+      if (closeMin == null) {
+        errors.entryCloseTime = "Entry Close Time must be HH:mm";
+        isValid = false;
+      } else {
+        if (startMin != null && closeMin < startMin) {
+          errors.entryCloseTime = "Entry Close Time cannot be before Start Time";
+          isValid = false;
+        }
+        if (endMin != null && closeMin > endMin) {
+          errors.entryCloseTime = "Entry Close Time cannot be after End Time";
+          isValid = false;
+        }
       }
     }
 
@@ -583,6 +637,15 @@ const EventForm = ({ id = null, isViewMode = false }) => {
     setFormErrors((prev) => ({ ...prev, customCategoryName: "" })); // clear error
   };
 
+
+  const getMinForDateTimeLocal = () => {
+    // Convert "now" to local ISO without timezone, then cut to yyyy-MM-ddTHH:mm
+    const now = new Date();
+    const tzOffsetMs = now.getTimezoneOffset() * 60000; // minutes -> ms
+    return new Date(now - tzOffsetMs).toISOString().slice(0, 16);
+  };
+
+
   return (
     <>
       {!loading && !pageLoading && (
@@ -647,6 +710,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                   onchange={handleInputChange("endTime")}
                   onBlur={handleInputBlur("endTime")}
                   error={formErrors.endTime}
+                  min={new Date().toISOString().split("T")[0]}  // <-- prevents past dates
                   type="time"
                   readonly={isViewMode}
                 />
@@ -656,6 +720,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                   onchange={handleInputChange("startDate")}
                   onBlur={handleInputBlur("startDate")}
                   error={formErrors.startDate}
+                  min={new Date().toISOString().split("T")[0]}  // <-- prevents past dates
                   type="date"
                   readonly={isViewMode}
                 />
@@ -665,6 +730,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                   onchange={handleInputChange("endDate")}
                   onBlur={handleInputBlur("endDate")}
                   error={formErrors.endDate}
+                  min={new Date().toISOString().split("T")[0]}  // <-- prevents past dates
                   type="date"
                   readonly={isViewMode}
                 />
@@ -674,6 +740,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                   onchange={handleInputChange("bookingStart")}
                   onBlur={handleInputBlur("bookingStart")}
                   error={formErrors.bookingStart}
+                  min={getMinForDateTimeLocal()}   // prevents past datetimes
                   type="datetime-local"
                   readonly={isViewMode}
                 />
@@ -683,6 +750,7 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                   onchange={handleInputChange("bookingEnd")}
                   onBlur={handleInputBlur("bookingEnd")}
                   error={formErrors.bookingEnd}
+                   min={getMinForDateTimeLocal()}   // prevents past datetimes
                   type="datetime-local"
                   readonly={isViewMode}
                 />
@@ -914,8 +982,8 @@ const EventForm = ({ id = null, isViewMode = false }) => {
                             id={`tickettype_capacity_${index}`}
                             value={option.capacity}
                             label="Capacity"
-                            onchange={handleTicketInputChange(index,"capacity")}
-                            onBlur={handleTicketInputBlur(index,"capacity")}
+                            onchange={handleTicketInputChange(index, "capacity")}
+                            onBlur={handleTicketInputBlur(index, "capacity")}
                             error={
                               formErrors.eventTicketType[index]?.capacity || ""
                             }

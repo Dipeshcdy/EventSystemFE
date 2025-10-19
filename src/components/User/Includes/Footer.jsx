@@ -36,7 +36,7 @@ const Footer = () => {
                     Streamline your event organization with our robust ticketing platform – sell tickets, manage check-ins,
                     and track attendance from one dashboard.
                   </p>
-                  <p>Customer care service : <a href="tel:+9779807261495">9807261495</a></p>
+                  <p className="mt-5">Customer care service : <a href="tel:+9779807261495">9807261495</a></p>
                 </div>
 
                 {/* Quick Links */}
